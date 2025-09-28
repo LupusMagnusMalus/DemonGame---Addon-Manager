@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Demonic Scans Game Enhancement Manager",
+  "version": "3.0.0",
+  "description": "Advanced enhancement manager combining GonBruck, Lupus, and Asura features",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "notifications"
+  ],
+  
+  "host_permissions": [
+    "https://game.demonicscans.org/*"
+  ],
+  
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Game Enhancement Manager"
+  },
+  
+  "background": {
+    "service_worker": "src/background/background.js"
+  },
+  
+  "content_scripts": [{
+    "matches": ["https://game.demonicscans.org/*"],
+    "js": ["src/content.js"],
+    "css": ["core/color-palette.css"],
+    "run_at": "document_start"
+  }],
+  
+  "web_accessible_resources": [{
+    "resources": [
+      "base/*",
+      "addons/*", 
+      "core/*",
+      "config/*"
+    ],
+    "matches": ["https://game.demonicscans.org/*"]
+  }],
+
+  "icons": {
+    "16": "addons/asura-advanced/assets/icons/icon16.png",
+    "48": "addons/asura-advanced/assets/icons/icon48.png",
+    "128": "addons/asura-advanced/assets/icons/icon128.png"
+  }
+}
