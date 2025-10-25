@@ -1,0 +1,56 @@
+/* Settings Tab - Only addon card specific styles */
+
+.addon-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.addon-card {
+  padding: var(--spacing-lg);
+  background: var(--ctp-surface0);
+  border: 2px solid var(--ctp-surface1);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.addon-card:hover {
+  border-color: var(--ctp-mauve);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(203, 166, 247, 0.2);
+}
+
+.addon-card.active {
+  border-color: var(--ctp-green);
+  background: rgba(166, 227, 161, 0.1);
+}
+
+.addon-icon {
+  font-size: 32px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.addon-card h4 {
+  font-size: 13px;
+  color: var(--ctp-text);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+}
+
+.addon-card p {
+  font-size: 11px;
+  color: var(--ctp-subtext0);
+  margin-bottom: var(--spacing-sm);
+}
+
+.addon-count {
+  font-size: 10px;
+  color: var(--ctp-overlay0);
+  background: var(--ctp-base);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+}

@@ -1,0 +1,20 @@
+/* Asura Tab - Only specific overrides if needed */
+
+/* Custom gradient for Asura theme */
+.category-header {
+  background: linear-gradient(90deg, rgba(203, 166, 247, 0.1), transparent);
+}
+
+.category-header:hover {
+  background: linear-gradient(90deg, rgba(203, 166, 247, 0.2), transparent);
+}
+
+/* Asura-specific styling for titles */
+.category-title {
+  color: var(--ctp-mauve);
+}
+
+/* Custom toggle color for Asura */
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, var(--ctp-mauve), #b4befe);
+}

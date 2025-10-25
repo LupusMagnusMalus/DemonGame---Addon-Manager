@@ -3,356 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Enhancement Manager</title>
+  <title>Lupus Addon Manager</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="popup-container">
-    <!-- Header -->
-    <header class="popup-header">
-      <div class="header-content">
-        <h1>🎮 Enhancement Manager</h1>
-        <p class="subtitle">Combine the best of GonBruck, Lupus & Asura</p>
+  <!-- Header -->
+  <header class="popup-header">
+    <div class="header-title">
+      <div class="extension-icon">🐺</div>
+      <div>
+        <h1>Lupus Addon Manager</h1>
+        <span class="header-subtitle">Addon Control Center</span>
       </div>
-      <div class="header-status">
-        <span class="status-indicator" id="status-indicator"></span>
-        <span class="status-text" id="status-text">Loading...</span>
-      </div>
-    </header>
+    </div>
+    <span class="header-version">v0.1.0</span>
+  </header>
 
-    <!-- Tab Navigation -->
-    <nav class="tab-navigation">
-      <button class="tab-btn active" data-tab="features">
-        <span class="tab-icon">⚡</span>
-        Features
-      </button>
-      <button class="tab-btn" data-tab="customization">
-        <span class="tab-icon">🎨</span>
-        Themes
-      </button>
-      <button class="tab-btn" data-tab="advanced">
-        <span class="tab-icon">⚙️</span>
-        Advanced
-      </button>
-    </nav>
+  <!-- Tab Navigation (populated dynamically) -->
+  <nav class="tab-navigation" id="tabNavigation">
+    <!-- Tabs inserted by JS -->
+  </nav>
 
-    <!-- Tab Contents -->
-    <main class="tab-content-container">
-      <!-- Features Tab -->
-      <div id="features-tab" class="tab-content active">
-        <div class="content-section">
-          <div class="section-header">
-            <h2>📦 Base Features (GonBruck)</h2>
-            <p>Core enhancements from the original extension</p>
-          </div>
-          
-          <div class="feature-grid">
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="sidebar" checked>
-              <div class="card-content">
-                <div class="card-icon">🧩</div>
-                <h3>Enhanced Sidebar</h3>
-                <p>Navigation sidebar with game menu</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
+  <!-- Tab Content Container -->
+  <main id="tabContent">
+    <div class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Initializing...</div>
+    </div>
+  </main>
 
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="wave_mods" checked>
-              <div class="card-content">
-                <div class="card-icon">🌊</div>
-                <h3>Wave Enhancements</h3>
-                <p>Instant loot, monster filters, battle sorting</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
+  <!-- Footer -->
+  <footer class="popup-footer">
+    <div class="footer-status">
+      <span class="status-indicator"></span>
+      <span>Loading...</span>
+    </div>
+    <div class="footer-actions">
+      <button class="footer-button" id="refreshStatus" title="Refresh Status">🔄</button>
+      <button class="footer-button" id="openHelp" title="Help">❓</button>
+    </div>
+  </footer>
 
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="battle_mods" checked>
-              <div class="card-content">
-                <div class="card-icon">⚔️</div>
-                <h3>Battle Improvements</h3>
-                <p>Damage tracking, reduced UI, quick actions</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
+  <!-- Toast Container -->
+  <div class="toast-container"></div>
 
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="inventory_mods" checked>
-              <div class="card-content">
-                <div class="card-icon">🎒</div>
-                <h3>Inventory Features</h3>
-                <p>Grid view, damage calculations</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="stats_mods" checked>
-              <div class="card-content">
-                <div class="card-icon">📊</div>
-                <h3>Stats Enhancements</h3>
-                <p>Damage vs defense calculations</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card">
-              <input type="checkbox" name="base-feature" value="pvp_mods" checked>
-              <div class="card-content">
-                <div class="card-icon">🥊</div>
-                <h3>PvP Arena</h3>
-                <p>Defender highlights, point tracking</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-          </div>
-        </div>
-
-        <div class="content-section">
-          <div class="section-header">
-            <h2>⚡ Lupus Enhancements</h2>
-            <p>Additional features from the enhanced fork</p>
-          </div>
-          
-          <div class="feature-grid">
-            <label class="feature-card" data-feature="lupus">
-              <input type="checkbox" name="lupus-feature" value="submenus">
-              <div class="card-content">
-                <div class="card-icon">📂</div>
-                <h3>Collapsible Submenus</h3>
-                <p>Organize navigation with expandable menus</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="lupus">
-              <input type="checkbox" name="lupus-feature" value="timeFormat24h">
-              <div class="card-content">
-                <div class="card-icon">🕐</div>
-                <h3>24-Hour Time Format</h3>
-                <p>Display server time in 24-hour format</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="lupus">
-              <input type="checkbox" name="lupus-feature" value="rankDetection">
-              <div class="card-content">
-                <div class="card-icon">🏆</div>
-                <h3>Smart Rank Detection</h3>
-                <p>Auto-adjust PvP links based on rank</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="lupus">
-              <input type="checkbox" name="lupus-feature" value="levelGateSwitch">
-              <div class="card-content">
-                <div class="card-icon">🚪</div>
-                <h3>Auto Gate Switch</h3>
-                <p>Switch to Wave 2 at level 50</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-          </div>
-        </div>
-
-        <div class="content-section">
-          <div class="section-header">
-            <h2>🚀 Asura Advanced</h2>
-            <p>Professional-grade features and enhancements</p>
-          </div>
-          
-          <div class="feature-grid">
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="advancedSidebar">
-              <div class="card-content">
-                <div class="card-icon">🎛️</div>
-                <h3>Advanced Sidebar</h3>
-                <p>Stats display, quick access, expandable sections</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="quickAccess">
-              <div class="card-content">
-                <div class="card-icon">⚡</div>
-                <h3>Quick Access System</h3>
-                <p>Pin inventory & merchant items</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="advancedFilters">
-              <div class="card-content">
-                <div class="card-icon">🔍</div>
-                <h3>Advanced Filters</h3>
-                <p>Multi-criteria monster filtering</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="battlePrediction">
-              <div class="card-content">
-                <div class="card-icon">🔮</div>
-                <h3>Battle Prediction</h3>
-                <p>PvP win/loss probability analysis</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="customBackgrounds">
-              <div class="card-content">
-                <div class="card-icon">🖼️</div>
-                <h3>Custom Backgrounds</h3>
-                <p>Page-specific background images</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-
-            <label class="feature-card" data-feature="asura">
-              <input type="checkbox" name="asura-feature" value="petNaming">
-              <div class="card-content">
-                <div class="card-icon">🐾</div>
-                <h3>Pet Naming System</h3>
-                <p>Give custom names to your pets</p>
-              </div>
-              <div class="card-toggle"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Customization Tab -->
-      <div id="customization-tab" class="tab-content">
-        <div class="content-section">
-          <div class="section-header">
-            <h2>🎨 Color Themes</h2>
-            <p>Customize the appearance of your enhancement</p>
-          </div>
-
-          <div class="color-section">
-            <h3>Sidebar Colors</h3>
-            <div class="color-palette" id="sidebar-colors">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <div class="color-section">
-            <h3>Background Colors</h3>
-            <div class="color-palette" id="background-colors">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <div class="preset-section">
-            <h3>Color Presets</h3>
-            <div class="preset-grid">
-              <button class="preset-btn" data-preset="cyberpunk">
-                <span class="preset-preview cyberpunk"></span>
-                Cyberpunk
-              </button>
-              <button class="preset-btn" data-preset="forest">
-                <span class="preset-preview forest"></span>
-                Forest
-              </button>
-              <button class="preset-btn" data-preset="ocean">
-                <span class="preset-preview ocean"></span>
-                Ocean
-              </button>
-              <button class="preset-btn" data-preset="sunset">
-                <span class="preset-preview sunset"></span>
-                Sunset
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Advanced Tab -->
-      <div id="advanced-tab" class="tab-content">
-        <div class="content-section">
-          <div class="section-header">
-            <h2>⚙️ Advanced Settings</h2>
-            <p>Fine-tune your experience</p>
-          </div>
-
-          <div class="settings-grid">
-            <div class="setting-item">
-              <label for="pinned-items-limit">Pinned Items Limit</label>
-              <input type="number" id="pinned-items-limit" min="1" max="10" value="3">
-              <p class="setting-description">Maximum items to pin in quick access</p>
-            </div>
-
-            <div class="setting-item">
-              <label for="refresh-interval">Auto-refresh Interval</label>
-              <select id="refresh-interval">
-                <option value="30">30 seconds</option>
-                <option value="60" selected>1 minute</option>
-                <option value="300">5 minutes</option>
-                <option value="0">Disabled</option>
-              </select>
-              <p class="setting-description">Automatic page refresh for wave pages</p>
-            </div>
-
-            <div class="setting-item">
-              <label for="debug-mode">Debug Mode</label>
-              <input type="checkbox" id="debug-mode">
-              <p class="setting-description">Enable additional debugging features</p>
-            </div>
-
-            <div class="setting-item">
-              <label for="performance-mode">Performance Mode</label>
-              <input type="checkbox" id="performance-mode">
-              <p class="setting-description">Reduce animations for better performance</p>
-            </div>
-          </div>
-
-          <div class="data-management">
-            <h3>Data Management</h3>
-            <div class="management-actions">
-              <button id="export-settings" class="management-btn">
-                📤 Export Settings
-              </button>
-              <button id="import-settings" class="management-btn">
-                📥 Import Settings
-              </button>
-              <button id="reset-settings" class="management-btn danger">
-                🔄 Reset to Defaults
-              </button>
-              <button id="clear-all-data" class="management-btn danger">
-                🗑️ Clear All Data
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="popup-footer">
-      <div class="footer-info">
-        <span class="version-info">v3.0.0</span>
-        <span class="feature-count">
-          <span id="active-features-count">0</span> features active
-        </span>
-      </div>
-      <div class="footer-actions">
-        <button id="apply-config" class="primary-btn">
-          ✅ Apply Configuration
-        </button>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Hidden file input for import -->
-  <input type="file" id="import-file-input" accept=".json" style="display: none;">
-
+  <!-- Scripts -->
+  <script src="tab-loader.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+<div class="container">
+  <!-- Addon Source Selection -->
+  <div class="settings-section">
+    <h3>Feature Sets</h3>
+    <div class="addon-cards">
+      <div class="addon-card active" data-addon="base">
+        <div class="addon-icon">🎮</div>
+        <h4>Base Features</h4>
+        <p>Core enhancements</p>
+        <span class="addon-count">13 features</span>
+      </div>
+      
+      <div class="addon-card" data-addon="lupus">
+        <div class="addon-icon">🚀</div>
+        <h4>Lupus Extended</h4>
+        <p>Advanced functionality</p>
+        <span class="addon-count">5 features</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature List (populated by JS) -->
+  <div id="featureList"></div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button class="action-button" id="enableAll">Enable All</button>
+    <button class="action-button secondary" id="disableAll">Disable All</button>
+    <button class="action-button secondary" id="resetToDefaults">Reset to Defaults</button>
+  </div>
+
+  <!-- Export/Import -->
+  <div class="settings-section">
+    <h3>Configuration</h3>
+    <div class="action-buttons">
+      <button class="action-button" id="exportConfig">
+        <span>📤</span> Export
+      </button>
+      <button class="action-button secondary" id="importConfig">
+        <span>📥</span> Import
+      </button>
+      <input type="file" id="importFile" accept=".json" style="display: none">
+    </div>
+  </div>
+</div>

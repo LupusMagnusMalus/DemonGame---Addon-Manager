@@ -110,13 +110,6 @@ Set different background images for:
 - Stat Allocation requires Advanced Sidebar
 - Enhanced Sidebar builds on Base Sidebar
 
-## 🔄 Migration
-
-The extension automatically detects and migrates settings from:
-- Original GonBruck extension
-- Lupus enhanced fork
-- Asura advanced addon
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -159,10 +152,10 @@ For support:
 
 ## 🔄 Version History
 
-### v3.0.0
+### v0.1.0
 - Complete modular rewrite
 - Combined all three addon systems
-- New popup interface with tabs
+- New popup interface with tabs for settings
 - Advanced color theming
 - Improved performance and reliability
 
@@ -175,7 +168,6 @@ See individual addon repositories for historical versions:
 ## 🎯 Roadmap
 
 ### Planned Features
-- Cloud settings sync
 - More customization options
 - Additional page integrations
 - Mobile-responsive improvements

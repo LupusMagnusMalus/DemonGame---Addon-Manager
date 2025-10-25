@@ -1,0 +1,122 @@
+/* Notifications Tab - Only custom styles */
+
+/* Volume Slider Enhancements */
+.setting-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: var(--ctp-surface1);
+  border-radius: 3px;
+  outline: none;
+  margin-right: 10px;
+}
+
+.setting-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--ctp-mauve);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.setting-control input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--ctp-pink, #f5c2e7);
+  transform: scale(1.1);
+}
+
+.setting-control input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--ctp-mauve);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.setting-control input[type="range"]::-moz-range-thumb:hover {
+  background: var(--ctp-pink, #f5c2e7);
+  transform: scale(1.1);
+}
+
+#volumeValue {
+  font-size: 12px;
+  color: var(--ctp-text);
+  font-weight: 600;
+  min-width: 45px;
+  display: inline-block;
+  text-align: right;
+}
+
+/* Notification History Specific Styles */
+.notification-history {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: var(--spacing-lg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ctp-surface1) transparent;
+}
+
+.notification-history::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-history::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-history::-webkit-scrollbar-thumb {
+  background: var(--ctp-surface1);
+  border-radius: 3px;
+}
+
+.notification-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--ctp-surface0);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all 0.2s ease;
+}
+
+.notification-history-item:hover {
+  background: var(--ctp-base);
+  border-color: var(--ctp-surface2);
+}
+
+.notification-history-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.notification-history-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-history-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ctp-text);
+  margin-bottom: 4px;
+}
+
+.notification-history-message {
+  font-size: 11px;
+  color: var(--ctp-subtext0);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.notification-history-time {
+  font-size: 10px;
+  color: var(--ctp-overlay0);
+  font-style: italic;
+}

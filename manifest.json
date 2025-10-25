@@ -1,48 +1,72 @@
 {
   "manifest_version": 3,
-  "name": "Demonic Scans Game Enhancement Manager",
-  "version": "3.0.0",
-  "description": "Advanced enhancement manager combining GonBruck, Lupus, and Asura features",
+  "name": "Lupus - Addon Manager",
+  "version": "0.1.0",
+  "description": "Addon Manager that combines features from the addons by GonBruck and Asura. Manage and use addons for DemonicScans.com in one single extension.",
+  
+  "icons": {
+    "16": "src/favicon.png",
+    "32": "src/favicon.png",
+    "48": "src/favicon.png",
+    "128": "src/favicon.png"
+  },
   
   "permissions": [
     "storage",
+    "tabs",
+    "scripting",
     "activeTab",
-    "notifications"
+    "notifications",
+    "alarms"
   ],
   
   "host_permissions": [
-    "https://game.demonicscans.org/*"
+    "*://*/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": [
+        "core/utils.js",
+        "src/content.js"
+      ],
+      "css": [
+        "base/styles/common.css"
+      ],
+      "run_at": "document_end"
+    }
   ],
   
   "action": {
-    "default_popup": "src/popup/popup.html",
-    "default_title": "Game Enhancement Manager"
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "src/favicon.png",
+      "32": "src/favicon.png",
+      "48": "src/favicon.png",
+      "128": "src/favicon.png"
+    },
+    "default_title": "Addon Settings"
   },
   
-  "background": {
-    "service_worker": "src/background/background.js"
-  },
-  
-  "content_scripts": [{
-    "matches": ["https://game.demonicscans.org/*"],
-    "js": ["src/content.js"],
-    "css": ["core/color-palette.css"],
-    "run_at": "document_start"
-  }],
-  
-  "web_accessible_resources": [{
-    "resources": [
-      "base/*",
-      "addons/*", 
-      "core/*",
-      "config/*"
-    ],
-    "matches": ["https://game.demonicscans.org/*"]
-  }],
-
-  "icons": {
-    "16": "addons/asura-advanced/assets/icons/icon16.png",
-    "48": "addons/asura-advanced/assets/icons/icon48.png",
-    "128": "addons/asura-advanced/assets/icons/icon128.png"
-  }
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "base/modules/*.js",
+        "base/styles/*.css",
+        "lupus-enhancements/modules/*.js",
+        "lupus-enhancements/styles/*.css",
+        "asura-advanced/modules/*.js",
+        "asura-advanced/styles/*.css",
+        "src/sounds/alarm/*.mp3",
+        "src/favicon.png"
+      ],
+      "matches": ["*://*/*"]
+    }
+  ]
 }
