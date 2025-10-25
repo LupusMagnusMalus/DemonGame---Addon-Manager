@@ -12,25 +12,44 @@ class PopupController {
     console.log('🐺 Initializing Lupus Addon Manager...');
     
     try {
-      this.tabs = await this.tabLoader.discoverTabs();
-      this.renderTabs();
-      
-      if (this.tabs.length > 0) {
-        await this.switchTab(this.tabs[0].id);
+      // Initialize color palette first
+      if (window.ColorPalette && !window.colorPalette) {
+        console.log('🎨 Initializing ColorPalette...');
+        window.colorPalette = new ColorPalette();
+        await window.colorPalette.init();
       }
       
+      console.log('🔍 Discovering tabs...');
+      this.tabs = await this.tabLoader.discoverTabs();
+      
+      if (this.tabs.length === 0) {
+        throw new Error('No tabs discovered');
+      }
+      
+      console.log('🎨 Rendering tabs...');
+      this.renderTabs();
+      
+      console.log('📂 Loading first tab...');
+      await this.switchTab(this.tabs[0].id);
+      
+      console.log('⚙️ Setting up event listeners...');
       this.setupEventListeners();
       this.checkExtensionStatus();
       
-      console.log('✅ Addon Manager initialized successfully');
+      console.log('✅ Lupus Manager initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize:', error);
-      this.showError('Failed to initialize. Please reload.');
+      this.showError('Failed to initialize. Please check console for details.');
     }
   }
 
   renderTabs() {
     const nav = document.getElementById('tabNavigation');
+    if (!nav) {
+      console.error('❌ Tab navigation element not found!');
+      return;
+    }
+    
     nav.innerHTML = '';
     
     this.tabs
@@ -47,36 +66,58 @@ class PopupController {
         button.addEventListener('click', () => this.switchTab(tab.id));
         nav.appendChild(button);
       });
+    
+    console.log('✅ Tabs rendered:', this.tabs.length);
   }
 
   async switchTab(tabId) {
+    console.log(`🔄 Switching to tab: ${tabId}`);
+    
+    // Update tab button states
     document.querySelectorAll('.tab-button').forEach(btn => {
       btn.classList.remove('active');
     });
     document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
     
+    // Unload previous tab
     if (this.currentTab) {
       this.tabLoader.unloadTab(this.currentTab);
     }
     
     const contentContainer = document.getElementById('tabContent');
+    if (!contentContainer) {
+      console.error('❌ Content container not found!');
+      return;
+    }
+    
     contentContainer.innerHTML = '<div class="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>';
     
     try {
+      console.log(`📂 Loading tab content for: ${tabId}`);
       const html = await this.tabLoader.loadTab(tabId);
       contentContainer.innerHTML = html;
       this.currentTab = tabId;
       
-      if (window[`init_${tabId}`]) {
-        await window[`init_${tabId}`](this);
+      // Initialize tab if init function exists
+      const initFn = window[`init_${tabId}`];
+      if (initFn && typeof initFn === 'function') {
+        console.log(`⚙️ Initializing tab: ${tabId}`);
+        await initFn(this);
+      } else {
+        console.warn(`⚠️ No init function found for ${tabId}`);
       }
+      
+      console.log(`✅ Tab ${tabId} loaded successfully`);
     } catch (error) {
-      console.error(`Failed to load tab ${tabId}:`, error);
+      console.error(`❌ Failed to load tab ${tabId}:`, error);
       contentContainer.innerHTML = `
         <div class="error-message">
           <h3>⚠️ Error</h3>
-          <p>Failed to load content. Please try again.</p>
-          <button class="action-button" onclick="location.reload()">Reload</button>
+          <p>Failed to load tab: ${tabId}</p>
+          <p style="font-size: 11px; color: var(--theme-text-secondary); margin-top: 8px;">
+            ${error.message}
+          </p>
+          <button class="action-button" onclick="location.reload()">Reload Extension</button>
         </div>
       `;
     }
@@ -94,7 +135,7 @@ class PopupController {
     const helpButton = document.getElementById('openHelp');
     if (helpButton) {
       helpButton.addEventListener('click', () => {
-        chrome.tabs.create({ url: 'https://github.com/yourusername/lupus-addon-manager' });
+        chrome.tabs.create({ url: 'https://github.com/LupusMagnusMalus/DemonGame---Addon-Manager' });
       });
     }
   }
@@ -107,28 +148,26 @@ class PopupController {
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
-        if (tab) {
-          statusIndicator.style.background = 'var(--ctp-green)';
-          statusText.textContent = 'Manager Active';
+        if (tab && tab.url && tab.url.includes('demonichunter.com')) {
+          statusIndicator.style.background = 'var(--theme-success)';
+          statusText.textContent = 'Active on DemonicHunter';
+        } else if (tab) {
+          statusIndicator.style.background = 'var(--theme-warning)';
+          statusText.textContent = 'Not on DemonicHunter';
         } else {
-          statusIndicator.style.background = 'var(--ctp-yellow)';
+          statusIndicator.style.background = 'var(--theme-error)';
           statusText.textContent = 'No Active Tab';
         }
       } catch (error) {
-        statusIndicator.style.background = 'var(--ctp-red)';
-        statusText.textContent = 'Manager Error';
+        statusIndicator.style.background = 'var(--theme-error)';
+        statusText.textContent = 'Status Error';
+        console.error('Status check error:', error);
       }
     }
   }
 
-  // ========== UTILITY FUNCTIONS (Reusable by all tabs) ==========
+  // ========== UTILITY FUNCTIONS ==========
 
-  /**
-   * Show toast notification
-   * @param {string} message - Message to display
-   * @param {string} type - Type: success, error, info, warning
-   * @param {number} duration - Duration in ms (default: 3000)
-   */
   showToast(message, type = 'info', duration = 3000) {
     let container = document.querySelector('.toast-container');
     
@@ -150,10 +189,6 @@ class PopupController {
     }, duration);
   }
 
-  /**
-   * Show error message in content area
-   * @param {string} message - Error message to display
-   */
   showError(message) {
     const main = document.getElementById('tabContent');
     if (main) {
@@ -167,11 +202,6 @@ class PopupController {
     }
   }
 
-  /**
-   * Load configuration from storage
-   * @param {string} key - Config key to load
-   * @returns {Promise<any>} Configuration data
-   */
   async loadConfig(key = 'config') {
     try {
       const result = await chrome.storage.local.get([key]);
@@ -182,12 +212,6 @@ class PopupController {
     }
   }
 
-  /**
-   * Save configuration to storage
-   * @param {string} key - Config key to save
-   * @param {any} data - Data to save
-   * @returns {Promise<boolean>} Success status
-   */
   async saveConfig(key = 'config', data) {
     try {
       await chrome.storage.local.set({ [key]: data });
@@ -198,12 +222,6 @@ class PopupController {
     }
   }
 
-  /**
-   * Setup feature toggles with auto-save
-   * @param {Object} features - Feature configuration object
-   * @param {string} namespace - Config namespace (base, lupus, asura, etc.)
-   * @param {Function} callback - Optional callback after toggle
-   */
   setupFeatureToggles(features, namespace, callback = null) {
     Object.keys(features).forEach(featureId => {
       const toggle = document.getElementById(featureId);
@@ -213,28 +231,22 @@ class PopupController {
         toggle.addEventListener('change', async () => {
           features[featureId] = toggle.checked;
           
-          // Save to storage
           const config = await this.loadConfig();
           if (!config[namespace]) config[namespace] = {};
           config[namespace][featureId] = toggle.checked;
           await this.saveConfig('config', config);
           
-          // Show feedback
           this.showToast(
             `${this.formatFeatureName(featureId)} ${toggle.checked ? 'enabled' : 'disabled'}`,
             'success'
           );
           
-          // Call callback if provided
           if (callback) callback(featureId, toggle.checked);
         });
       }
     });
   }
 
-  /**
-   * Setup category collapse functionality
-   */
   setupCategoryCollapse() {
     document.querySelectorAll('.category-header').forEach(header => {
       header.addEventListener('click', () => {
@@ -249,11 +261,6 @@ class PopupController {
     });
   }
 
-  /**
-   * Format feature ID to readable name
-   * @param {string} featureId - camelCase feature ID
-   * @returns {string} Formatted name
-   */
   formatFeatureName(featureId) {
     return featureId
       .replace(/([A-Z])/g, ' $1')
@@ -261,11 +268,6 @@ class PopupController {
       .trim();
   }
 
-  /**
-   * Export configuration to JSON file
-   * @param {Object} data - Data to export
-   * @param {string} filename - Filename (default: lupus-config-{timestamp}.json)
-   */
   async exportConfig(data, filename = null) {
     try {
       const name = filename || `lupus-config-${Date.now()}.json`;
@@ -288,11 +290,6 @@ class PopupController {
     }
   }
 
-  /**
-   * Import configuration from JSON file
-   * @param {File} file - File to import
-   * @returns {Promise<Object|null>} Imported data or null if failed
-   */
   async importConfig(file) {
     try {
       const text = await file.text();
@@ -309,6 +306,7 @@ class PopupController {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 DOM Content Loaded, initializing popup...');
   window.popupController = new PopupController();
   window.popupController.init();
 });

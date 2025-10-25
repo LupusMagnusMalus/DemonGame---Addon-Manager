@@ -1,139 +1,130 @@
-// Automatic Tab Discovery and Loading System
-// Discovers tabs by attempting to load known tab files
+// Tab Loader - Dynamic Tab Loading System
 class TabLoader {
   constructor() {
     this.tabs = [];
-    this.tabsDirectory = 'popup/tabs/';
-    this.knownTabs = [
-      'settings',
-      'notifications', 
-      'asura',
-      'about'
-    ];
+    this.loadedTabs = new Map();
+    this.baseTabPath = './tabs/'; // Relativ zu popup.html
   }
 
   async discoverTabs() {
-    const discoveredTabs = [];
+    console.log('🔍 Discovering tabs...');
     
-    // Try to load each known tab
-    for (const tabId of this.knownTabs) {
+    // Liste aller verfügbaren Tabs
+    const tabIds = ['settings', 'notifications', 'theme', 'asura', 'about'];
+    
+    for (const tabId of tabIds) {
       try {
-        const response = await fetch(chrome.runtime.getURL(`${this.tabsDirectory}${tabId}.html`));
-        if (response.ok) {
-          // Try to load metadata if exists
-          const metadata = await this.loadTabMetadata(tabId);
-          discoveredTabs.push({
-            id: tabId,
-            name: metadata.name || this.formatTabName(tabId),
-            icon: metadata.icon || '📄',
-            order: metadata.order || 999
-          });
+        const metadataPath = `${this.baseTabPath}${tabId}.json`;
+        console.log(`📋 Loading metadata for ${tabId} from ${metadataPath}`);
+        
+        const response = await fetch(metadataPath);
+        if (!response.ok) {
+          console.warn(`⚠️ Could not load ${tabId}.json:`, response.status);
+          continue;
         }
+        
+        const metadata = await response.json();
+        this.tabs.push({
+          id: tabId,
+          ...metadata
+        });
+        
+        console.log(`✅ Tab registered: ${tabId}`);
       } catch (error) {
-        // Tab doesn't exist, skip it
-        console.log(`Tab ${tabId} not found, skipping`);
+        console.warn(`⚠️ Failed to load tab ${tabId}:`, error);
       }
     }
     
-    this.tabs = discoveredTabs.sort((a, b) => a.order - b.order);
+    console.log(`✅ Discovered ${this.tabs.length} tabs:`, this.tabs.map(t => t.id));
     return this.tabs;
   }
 
-  async loadTabMetadata(tabId) {
-    try {
-      const response = await fetch(chrome.runtime.getURL(`${this.tabsDirectory}${tabId}.json`));
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      // Metadata is optional
-    }
-    return {};
-  }
-
-  formatTabName(tabId) {
-    return tabId
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
   async loadTab(tabId) {
-    const basePath = this.tabsDirectory + tabId;
+    console.log(`📂 Loading tab: ${tabId}`);
+    
+    // Check if already loaded
+    if (this.loadedTabs.has(tabId)) {
+      console.log(`♻️ Tab ${tabId} already loaded, using cache`);
+      return this.loadedTabs.get(tabId);
+    }
     
     try {
       // Load HTML
-      const htmlResponse = await fetch(chrome.runtime.getURL(`${basePath}.html`));
+      const htmlPath = `${this.baseTabPath}${tabId}.html`;
+      console.log(`📄 Loading HTML from: ${htmlPath}`);
+      
+      const htmlResponse = await fetch(htmlPath);
+      if (!htmlResponse.ok) {
+        throw new Error(`Failed to load ${htmlPath}: ${htmlResponse.status}`);
+      }
       const html = await htmlResponse.text();
       
-      // Load CSS if exists
-      await this.loadTabCSS(basePath);
+      // Load CSS
+      const cssPath = `${this.baseTabPath}${tabId}.css`;
+      console.log(`🎨 Loading CSS from: ${cssPath}`);
       
-      // Load JS if exists
-      await this.loadTabJS(basePath);
+      const cssResponse = await fetch(cssPath);
+      if (cssResponse.ok) {
+        const css = await cssResponse.text();
+        
+        // Check if stylesheet already exists
+        let styleSheet = document.getElementById(`tab-style-${tabId}`);
+        if (!styleSheet) {
+          styleSheet = document.createElement('style');
+          styleSheet.id = `tab-style-${tabId}`;
+          styleSheet.textContent = css;
+          document.head.appendChild(styleSheet);
+          console.log(`✅ CSS loaded for ${tabId}`);
+        }
+      } else {
+        console.warn(`⚠️ No CSS file for ${tabId}`);
+      }
       
+      // Load JS
+      const jsPath = `${this.baseTabPath}${tabId}.js`;
+      console.log(`⚙️ Loading JS from: ${jsPath}`);
+      
+      const jsResponse = await fetch(jsPath);
+      if (jsResponse.ok) {
+        const js = await jsResponse.text();
+        
+        // Check if script already exists
+        if (!document.getElementById(`tab-script-${tabId}`)) {
+          const script = document.createElement('script');
+          script.id = `tab-script-${tabId}`;
+          script.textContent = js;
+          document.body.appendChild(script);
+          console.log(`✅ JS loaded for ${tabId}`);
+        }
+      } else {
+        console.warn(`⚠️ No JS file for ${tabId}`);
+      }
+      
+      // Cache the HTML
+      this.loadedTabs.set(tabId, html);
+      
+      console.log(`✅ Tab ${tabId} fully loaded`);
       return html;
+      
     } catch (error) {
-      console.error(`Failed to load tab ${tabId}:`, error);
+      console.error(`❌ Error loading tab ${tabId}:`, error);
       throw error;
     }
   }
 
-  async loadTabCSS(basePath) {
-    try {
-      const response = await fetch(chrome.runtime.getURL(`${basePath}.css`));
-      if (response.ok) {
-        const css = await response.text();
-        const styleId = `tab-style-${basePath.split('/').pop()}`;
-        
-        // Remove old style if exists
-        document.getElementById(styleId)?.remove();
-        
-        // Add new style
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = css;
-        document.head.appendChild(style);
-      }
-    } catch (error) {
-      // CSS is optional
-      console.log(`No CSS found for ${basePath}`);
-    }
-  }
-
-  async loadTabJS(basePath) {
-    try {
-      const response = await fetch(chrome.runtime.getURL(`${basePath}.js`));
-      if (response.ok) {
-        const js = await response.text();
-        const scriptId = `tab-script-${basePath.split('/').pop()}`;
-        
-        // Remove old script if exists
-        document.getElementById(scriptId)?.remove();
-        
-        // Add new script
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.textContent = js;
-        document.body.appendChild(script);
-      }
-    } catch (error) {
-      // JS is optional
-      console.log(`No JS found for ${basePath}`);
-    }
-  }
-
   unloadTab(tabId) {
-    // Remove tab-specific styles and scripts
-    document.getElementById(`tab-style-${tabId}`)?.remove();
-    document.getElementById(`tab-script-${tabId}`)?.remove();
-    
-    // Call cleanup if exists
-    if (window[`cleanup_${tabId}`]) {
-      window[`cleanup_${tabId}`]();
-      delete window[`cleanup_${tabId}`];
+    // Call cleanup function if exists
+    const cleanupFn = window[`cleanup_${tabId}`];
+    if (cleanupFn && typeof cleanupFn === 'function') {
+      try {
+        cleanupFn();
+        console.log(`🧹 Cleanup executed for ${tabId}`);
+      } catch (error) {
+        console.error(`❌ Cleanup error for ${tabId}:`, error);
+      }
     }
   }
 }
 
+// Export
 window.TabLoader = TabLoader;

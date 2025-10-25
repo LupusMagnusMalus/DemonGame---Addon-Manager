@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lupus Addon Manager</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="components/color-picker.css">
 </head>
 <body>
   <!-- Header -->
@@ -12,11 +13,11 @@
     <div class="header-title">
       <div class="extension-icon">🐺</div>
       <div>
-        <h1>Lupus Addon Manager</h1>
+        <h1>Lupus Manager</h1>
         <span class="header-subtitle">Addon Control Center</span>
       </div>
     </div>
-    <span class="header-version">v0.1.0</span>
+    <span class="header-version">v2.0.0</span>
   </header>
 
   <!-- Tab Navigation (populated dynamically) -->
@@ -47,7 +48,8 @@
   <!-- Toast Container -->
   <div class="toast-container"></div>
 
-  <!-- Scripts -->
+  <!-- Scripts - Lade ColorPalette zuerst! -->
+  <script src="../../core/color-palette.js"></script>
   <script src="tab-loader.js"></script>
   <script src="popup.js"></script>
 </body>
