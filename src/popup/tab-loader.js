@@ -10,7 +10,7 @@ class TabLoader {
   async discoverTabs() {
     console.log('🔍 Discovering tabs...');
     
-    const tabIds = ['settings', 'notifications', 'theme', 'asura', 'about'];
+    const tabIds = ['about', 'settings', 'notifications', 'theme', 'asura'];
     
     for (const tabId of tabIds) {
       try {
