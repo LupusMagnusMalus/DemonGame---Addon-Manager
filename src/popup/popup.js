@@ -1,15 +1,18 @@
 // Lupus Addon Manager - Popup Controller
-// Provides core functionality and utilities for all tabs
-
 class PopupController {
   constructor() {
     this.tabLoader = new TabLoader();
     this.currentTab = null;
     this.tabs = [];
+    this.manifest = chrome.runtime.getManifest();
   }
 
   async init() {
     console.log('🐺 Initializing Lupus Addon Manager...');
+    console.log('📋 Manifest version:', this.manifest.version);
+    
+    // Set version in header
+    this.setVersion();
     
     try {
       // Initialize color palette first
@@ -23,8 +26,10 @@ class PopupController {
       this.tabs = await this.tabLoader.discoverTabs();
       
       if (this.tabs.length === 0) {
-        throw new Error('No tabs discovered');
+        throw new Error('No tabs discovered - check that .json files exist in tabs/ folder');
       }
+      
+      console.log(`✅ Found ${this.tabs.length} tabs:`, this.tabs.map(t => t.name).join(', '));
       
       console.log('🎨 Rendering tabs...');
       this.renderTabs();
@@ -39,7 +44,15 @@ class PopupController {
       console.log('✅ Lupus Manager initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize:', error);
-      this.showError('Failed to initialize. Please check console for details.');
+      this.showError(`Failed to initialize: ${error.message}`);
+    }
+  }
+
+  setVersion() {
+    const versionElement = document.getElementById('headerVersion');
+    if (versionElement) {
+      versionElement.textContent = `v${this.manifest.version}`;
+      console.log('📌 Version set to:', this.manifest.version);
     }
   }
 
@@ -52,123 +65,179 @@ class PopupController {
     
     nav.innerHTML = '';
     
-    this.tabs
-      .sort((a, b) => (a.order || 999) - (b.order || 999))
-      .forEach(tab => {
-        const button = document.createElement('button');
-        button.className = 'tab-button';
-        button.setAttribute('data-tab', tab.id);
-        button.innerHTML = `
-          <span class="tab-button-icon">${tab.icon || '📄'}</span>
-          <span>${tab.name}</span>
-        `;
-        
-        button.addEventListener('click', () => this.switchTab(tab.id));
-        nav.appendChild(button);
-      });
+    const sortedTabs = this.tabs.sort((a, b) => (a.order || 999) - (b.order || 999));
+    console.log('📋 Rendering tabs in order:', sortedTabs.map(t => `${t.name} (${t.order || 999})`));
     
-    console.log('✅ Tabs rendered:', this.tabs.length);
+    sortedTabs.forEach(tab => {
+      const button = document.createElement('button');
+      button.className = 'tab-button';
+      button.setAttribute('data-tab', tab.id);
+      button.innerHTML = `
+        <span class="tab-button-icon">${tab.icon || '📄'}</span>
+        <span>${tab.name}</span>
+      `;
+      
+      button.addEventListener('click', () => {
+        console.log(`🖱️ Tab button clicked: ${tab.id}`);
+        this.switchTab(tab.id);
+      });
+      
+      nav.appendChild(button);
+      console.log(`✅ Tab button created: ${tab.name}`);
+    });
+    
+    console.log('✅ All tabs rendered');
   }
 
   async switchTab(tabId) {
     console.log(`🔄 Switching to tab: ${tabId}`);
-    
+  
     // Update tab button states
     document.querySelectorAll('.tab-button').forEach(btn => {
       btn.classList.remove('active');
     });
-    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
-    
+  
+    const activeButton = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeButton) {
+      activeButton.classList.add('active');
+      console.log(`✅ Tab button activated: ${tabId}`);
+    }
+  
     // Unload previous tab
     if (this.currentTab) {
+      console.log(`🧹 Unloading previous tab: ${this.currentTab}`);
       this.tabLoader.unloadTab(this.currentTab);
     }
-    
+  
     const contentContainer = document.getElementById('tabContent');
     if (!contentContainer) {
       console.error('❌ Content container not found!');
       return;
     }
-    
-    contentContainer.innerHTML = '<div class="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>';
-    
+  
+    contentContainer.innerHTML = `
+      <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading ${tabId}...</div>
+      </div>
+    `;
+  
     try {
       console.log(`📂 Loading tab content for: ${tabId}`);
       const html = await this.tabLoader.loadTab(tabId);
+    
+      console.log(`📄 HTML loaded, length: ${html.length} characters`);
       contentContainer.innerHTML = html;
       this.currentTab = tabId;
-      
+    
+      // Wait a bit for script to be parsed and executed
+      await new Promise(resolve => setTimeout(resolve, 100));
+    
       // Initialize tab if init function exists
       const initFn = window[`init_${tabId}`];
       if (initFn && typeof initFn === 'function') {
-        console.log(`⚙️ Initializing tab: ${tabId}`);
+        console.log(`⚙️ Running init function: init_${tabId}`);
         await initFn(this);
+        console.log(`✅ Init function completed: init_${tabId}`);
       } else {
-        console.warn(`⚠️ No init function found for ${tabId}`);
+        console.warn(`⚠️ No init function found: init_${tabId}`);
+        console.log('Available window functions:', Object.keys(window).filter(k => k.startsWith('init_')));
       }
-      
+    
       console.log(`✅ Tab ${tabId} loaded successfully`);
     } catch (error) {
       console.error(`❌ Failed to load tab ${tabId}:`, error);
       contentContainer.innerHTML = `
         <div class="error-message">
-          <h3>⚠️ Error</h3>
-          <p>Failed to load tab: ${tabId}</p>
-          <p style="font-size: 11px; color: var(--theme-text-secondary); margin-top: 8px;">
-            ${error.message}
-          </p>
-          <button class="action-button" onclick="location.reload()">Reload Extension</button>
+          <h3>⚠️ Error Loading Tab</h3>
+          <p><strong>Tab:</strong> ${tabId}</p>
+          <p><strong>Error:</strong> ${error.message}</p>
+          <details style="margin-top: 16px;">
+            <summary style="cursor: pointer; color: var(--theme-accent-1);">Technical Details</summary>
+            <pre style="font-size: 10px; margin-top: 8px; padding: 8px; background: var(--theme-panel-1); border-radius: 4px; overflow: auto; max-height: 200px;">${error.stack || 'No stack trace available'}</pre>
+          </details>
+          <button class="action-button" onclick="location.reload()" style="margin-top: 16px;">Reload Extension</button>
         </div>
       `;
     }
   }
 
   setupEventListeners() {
+    console.log('🔗 Setting up event listeners...');
+    
     const refreshButton = document.getElementById('refreshStatus');
     if (refreshButton) {
       refreshButton.addEventListener('click', () => {
+        console.log('🔄 Refresh button clicked');
         this.checkExtensionStatus();
         this.showToast('Status refreshed', 'info');
       });
+      console.log('✅ Refresh button listener attached');
+    } else {
+      console.warn('⚠️ Refresh button not found');
     }
     
     const helpButton = document.getElementById('openHelp');
     if (helpButton) {
       helpButton.addEventListener('click', () => {
+        console.log('❓ Help button clicked');
         chrome.tabs.create({ url: 'https://github.com/LupusMagnusMalus/DemonGame---Addon-Manager' });
       });
+      console.log('✅ Help button listener attached');
+    } else {
+      console.warn('⚠️ Help button not found');
     }
+    
+    console.log('✅ Event listeners setup complete');
   }
 
   async checkExtensionStatus() {
+    console.log('🔍 Checking extension status...');
+  
     const statusIndicator = document.querySelector('.status-indicator');
     const statusText = document.querySelector('.footer-status span:last-child');
+  
+    if (!statusIndicator || !statusText) {
+      console.warn('⚠️ Status elements not found');
+      console.log('Looking for:', {
+        indicator: !!statusIndicator,
+        text: !!statusText
+      });
+      return;
+    }
+  
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    if (statusIndicator && statusText) {
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
-        if (tab && tab.url && tab.url.includes('demonicscans.org')) {
+      if (tab && tab.url) {
+        console.log('📍 Current tab URL:', tab.url);
+      
+        if (tab.url.includes('demonicscans.org')) {
           statusIndicator.style.background = 'var(--theme-success)';
           statusText.textContent = 'Active on DemonicScans';
-        } else if (tab) {
+          console.log('✅ Extension active on DemonicScans site');
+        } else {
           statusIndicator.style.background = 'var(--theme-warning)';
           statusText.textContent = 'Not on DemonicScans';
-        } else {
-          statusIndicator.style.background = 'var(--theme-error)';
-          statusText.textContent = 'No Active Tab';
+          console.log('⚠️ Not on DemonicScans site');
         }
-      } catch (error) {
+      } else {
         statusIndicator.style.background = 'var(--theme-error)';
-        statusText.textContent = 'Status Error';
-        console.error('Status check error:', error);
+        statusText.textContent = 'No Active Tab';
+        console.log('❌ No active tab found');
       }
+    } catch (error) {
+      statusIndicator.style.background = 'var(--theme-error)';
+      statusText.textContent = 'Status Error';
+      console.error('❌ Status check error:', error);
     }
   }
 
   // ========== UTILITY FUNCTIONS ==========
 
   showToast(message, type = 'info', duration = 3000) {
+    console.log(`📢 Toast: [${type}] ${message}`);
+    
     let container = document.querySelector('.toast-container');
     
     if (!container) {
@@ -190,13 +259,18 @@ class PopupController {
   }
 
   showError(message) {
+    console.error('❌ Showing error:', message);
+    
     const main = document.getElementById('tabContent');
     if (main) {
       main.innerHTML = `
         <div class="error-message">
-          <h3>⚠️ Error</h3>
+          <h3>⚠️ Initialization Error</h3>
           <p>${message}</p>
-          <button class="action-button" onclick="location.reload()">Reload Extension</button>
+          <div class="action-buttons" style="margin-top: 16px;">
+            <button class="action-button" onclick="location.reload()">Reload Extension</button>
+            <button class="action-button secondary" onclick="chrome.runtime.openOptionsPage()">Open Settings</button>
+          </div>
         </div>
       `;
     }
@@ -304,9 +378,15 @@ class PopupController {
   }
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('📄 DOM Content Loaded, initializing popup...');
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPopup);
+} else {
+  initPopup();
+}
+
+function initPopup() {
+  console.log('📄 DOM Ready - Initializing popup controller...');
   window.popupController = new PopupController();
   window.popupController.init();
-});
+}

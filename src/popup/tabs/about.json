@@ -1,6 +1,6 @@
 {
   "name": "About",
   "icon": "ℹ️",
-  "order": 5,
-  "description": "About GonBruck and credits"
+  "order": 0,
+  "description": "About and credits"
 }

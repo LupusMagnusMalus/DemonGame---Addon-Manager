@@ -28,7 +28,9 @@
       if (path.includes('pets.php')) return 'pets';
       if (path.includes('merchant.php')) return 'merchant';
       if (path.includes('blacksmith.php')) return 'blacksmith';
-      if (path.includes('orc_cull_event.php')) return 'event';
+      if (path.includes('event.php')) return 'event';
+      if (path.includes('battle_pass.php')) return 'battle_pass';
+      if (path.includes('legendary_forge.php')) return 'legendary_forge';
       return 'dashboard';
     }
 
@@ -117,7 +119,11 @@
         'stats': ['stats-mods.js'],
         'pvp': ['pvp-mods.js'],
         'pets': ['pets-mods.js'],
-        'event': ['event-mods.js']
+        'event': ['event-mods.js'],
+        'merchant': ['merchant-mods.js'],
+        'blacksmith': ['blacksmith-mods.js'],
+        'battle_pass': ['battle-pass.js'],
+        'legendary_forge': ['legendary-forge-mods.js']
       };
 
       const modules = pageModules[this.currentPage] || [];
@@ -161,6 +167,10 @@
       // Level-based Gate Switching
       if (lupusConfig.levelGateSwitch) {
         await this.loadScript('addons/lupus-enhancements/modules/level-gate-switch.js');
+      }
+
+      if (lupusConfig.battlePassMods) {
+        await this.loadScript('addons/lupus-enhancements/modules/battle-pass.js');
       }
     }
 

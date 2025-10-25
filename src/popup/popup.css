@@ -760,3 +760,33 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ========== DEBUG STYLES ========== */
+/* Debug: Ensure buttons are visible and clickable */
+.footer-button {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.footer-button:hover {
+  background: var(--theme-surface1);
+}
+
+.footer-button:active {
+  transform: scale(0.95);
+}
+
+/* Debug: Tab loading state */
+.tab-loading {
+  padding: 12px;
+  text-align: center;
+  color: var(--theme-text-secondary);
+  font-size: 12px;
+}
+
+/* Debug: Ensure status text is visible */
+#statusText {
+  font-size: 11px;
+  color: var(--theme-text-secondary);
+}
