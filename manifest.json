@@ -25,7 +25,7 @@
   ],
   
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "src/background/background.js",
     "type": "module"
   },
   
@@ -44,7 +44,7 @@
   ],
   
   "action": {
-    "default_popup": "popup/popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "src/favicon.png",
       "32": "src/favicon.png",
