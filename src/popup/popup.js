@@ -148,12 +148,12 @@ class PopupController {
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
-        if (tab && tab.url && tab.url.includes('demonichunter.com')) {
+        if (tab && tab.url && tab.url.includes('demonicscans.org')) {
           statusIndicator.style.background = 'var(--theme-success)';
-          statusText.textContent = 'Active on DemonicHunter';
+          statusText.textContent = 'Active on DemonicScans';
         } else if (tab) {
           statusIndicator.style.background = 'var(--theme-warning)';
-          statusText.textContent = 'Not on DemonicHunter';
+          statusText.textContent = 'Not on DemonicScans';
         } else {
           statusIndicator.style.background = 'var(--theme-error)';
           statusText.textContent = 'No Active Tab';
