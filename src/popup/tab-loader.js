@@ -10,7 +10,7 @@ class TabLoader {
     console.log('🔍 Discovering tabs...');
     
     // Liste aller verfügbaren Tabs
-    const tabIds = ['settings', 'notifications', 'theme', 'asura', 'about'];
+    const tabIds = ['settings', 'notifications', 'themes', 'asura', 'about'];
     
     for (const tabId of tabIds) {
       try {
