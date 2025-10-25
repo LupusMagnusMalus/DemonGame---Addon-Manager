@@ -78,8 +78,8 @@ body {
 }
 
 .extension-icon {
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--ctp-mauve), var(--ctp-blue));
   display: flex;

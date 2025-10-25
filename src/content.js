@@ -139,7 +139,7 @@
 
     async loadLupusFeatures(lupusConfig) {
       await this.loadCSS('addons/lupus-enhancements/styles/enhanced-sidebar.css');
-      
+
       // Enhanced Sidebar mit Submenus
       if (lupusConfig.enhancedSidebar) {
         await this.loadScript('addons/lupus-enhancements/modules/enhanced-sidebar.js');
@@ -169,8 +169,9 @@
         await this.loadScript('addons/lupus-enhancements/modules/level-gate-switch.js');
       }
 
-      if (lupusConfig.battlePassMods) {
-        await this.loadScript('addons/lupus-enhancements/modules/battle-pass.js');
+      if (lupusConfig.battlePass) {
+        await this.loadScript('addons/lupus-enhancements/progressTrackScrollAction.js');
+        await this.loadScript('addons/lupus-enhancements/battle-pass.js');
       }
     }
 

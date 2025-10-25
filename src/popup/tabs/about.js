@@ -47,6 +47,23 @@
     document.getElementById('openChangelog')?.addEventListener('click', () => {
       chrome.tabs.create({ url: 'https://github.com/LupusMagnusMalus/DemonGame---Addon-Manager/releases' });
     });
+
+    document.getElementById('openGithubGonBruck')?.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://github.com/GonBruck' });
+    });
+
+    document.getElementById('openGithubGonBruckRepo')?.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://github.com/GonBruck/DemonGame' });
+    });
+
+    document.getElementById('openGithubAsura')?.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://github.com/asura-cr' });
+    });
+
+    document.getElementById('openGithubAsuraRepo')?.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://github.com/asura-cr/ui-addon' });
+    });
+
   }
 
   function cleanup_about() {

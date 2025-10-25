@@ -65,7 +65,8 @@ class PopupController {
     
     nav.innerHTML = '';
     
-    const sortedTabs = this.tabs.sort((a, b) => (a.order || 999) - (b.order || 999));
+    // Support order = 0 (0 is falsy, so use nullish coalescing instead of ||)
+    const sortedTabs = this.tabs.slice().sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
     console.log('📋 Rendering tabs in order:', sortedTabs.map(t => `${t.name} (${t.order || 999})`));
     
     sortedTabs.forEach(tab => {
@@ -215,7 +216,7 @@ class PopupController {
         if (tab.url.includes('demonicscans.org')) {
           statusIndicator.style.background = 'var(--theme-success)';
           statusText.textContent = 'Active on DemonicScans';
-          console.log('✅ Extension active on DemonicScans site');
+          console.log('✅ Extension active on DemonicScans');
         } else {
           statusIndicator.style.background = 'var(--theme-warning)';
           statusText.textContent = 'Not on DemonicScans';

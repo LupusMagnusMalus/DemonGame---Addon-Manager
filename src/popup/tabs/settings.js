@@ -1,12 +1,12 @@
-// Settings Tab Controller - Uses popupController utilities
+// Settings Tab Controller - Complete Feature Management
 (function() {
   'use strict';
 
   class SettingsController {
     constructor() {
       this.popupController = null;
-      this.config = { base: {}, lupus: {}, custom: {} };
-      this.currentAddon = 'base';
+      this.config = { base: {}, lupus: {}, asura: {} };
+      this.currentCategory = 'base';
       this.featureDefinitions = this.getFeatureDefinitions();
     }
 
@@ -14,13 +14,9 @@
       console.log('⚙️ Initializing Settings tab');
       
       this.popupController = popupController;
-      this.config = await popupController.loadConfig();
+      await this.loadConfig();
       
-      // Initialize addons with defaults if not present
-      if (!this.config.base) this.config.base = {};
-      if (!this.config.lupus) this.config.lupus = {};
-      
-      this.setupAddonSelector();
+      this.setupCategorySelector();
       this.renderFeatures();
       this.setupQuickActions();
       this.setupExportImport();
@@ -31,119 +27,267 @@
         base: {
           title: 'Base Features',
           icon: '🎮',
-          categories: [
+          description: 'Core enhancements and quality-of-life improvements',
+          features: [
             {
-              name: 'Core Enhancements',
-              features: [
-                { id: 'notificationSystem', name: 'Notification System', description: 'Enhanced in-game notifications' },
-                { id: 'itemTooltips', name: 'Item Tooltips', description: 'Detailed item information on hover' },
-                { id: 'inventoryView', name: 'Inventory View', description: 'Grid/List view toggle for inventory' },
-                { id: 'quickActions', name: 'Quick Actions', description: 'Fast action buttons on items' }
-              ]
+              id: 'notificationSystem',
+              name: 'Enhanced Notifications',
+              description: 'Improved notification system with sound alerts',
+              category: 'Core'
             },
             {
-              name: 'Battle & Stats',
-              features: [
-                { id: 'battleEnhancements', name: 'Battle Enhancements', description: 'Enhanced battle interface' },
-                { id: 'statsDisplay', name: 'Stats Display', description: 'Improved stats visualization' },
-                { id: 'pvpEnhancements', name: 'PvP Enhancements', description: 'Better PvP interface' }
-              ]
+              id: 'itemTooltips',
+              name: 'Item Tooltips',
+              description: 'Detailed item information on hover',
+              category: 'Core'
             },
             {
-              name: 'Quality of Life',
-              features: [
-                { id: 'petSummary', name: 'Pet Summary', description: 'Pet statistics and food calculator' },
-                { id: 'eventTracking', name: 'Event Tracking', description: 'Track active events' },
-                { id: 'monsterFilters', name: 'Monster Filters', description: 'Filter monsters by criteria' },
-                { id: 'lootCollection', name: 'Loot Collection', description: 'Quick loot collection tools' },
-                { id: 'gateCollapse', name: 'Gate Collapse', description: 'Collapsible gate sections' },
-                { id: 'battleAlarm', name: 'Battle Alarm', description: 'Audio alerts for battles' }
-              ]
+              id: 'inventoryView',
+              name: 'Inventory Grid/List Toggle',
+              description: 'Switch between grid and list view',
+              category: 'Core'
+            },
+            {
+              id: 'quickActions',
+              name: 'Quick Action Buttons',
+              description: 'Fast action buttons on items',
+              category: 'Core'
+            },
+            {
+              id: 'battleEnhancements',
+              name: 'Battle Interface',
+              description: 'Enhanced battle UI and information',
+              category: 'Battle'
+            },
+            {
+              id: 'statsDisplay',
+              name: 'Stats Display',
+              description: 'Improved statistics visualization',
+              category: 'Battle'
+            },
+            {
+              id: 'pvpEnhancements',
+              name: 'PvP Enhancements',
+              description: 'Better PvP interface and tracking',
+              category: 'Battle'
+            },
+            {
+              id: 'petSummary',
+              name: 'Pet Summary',
+              description: 'Pet statistics and food calculator',
+              category: 'Quality of Life'
+            },
+            {
+              id: 'eventTracking',
+              name: 'Event Tracking',
+              description: 'Track active events and timers',
+              category: 'Quality of Life'
+            },
+            {
+              id: 'monsterFilters',
+              name: 'Monster Filters',
+              description: 'Filter monsters by various criteria',
+              category: 'Quality of Life'
+            },
+            {
+              id: 'lootCollection',
+              name: 'Quick Loot Collection',
+              description: 'Fast loot collection tools',
+              category: 'Quality of Life'
+            },
+            {
+              id: 'gateCollapse',
+              name: 'Collapsible Gates',
+              description: 'Collapse/expand gate sections',
+              category: 'Quality of Life'
+            },
+            {
+              id: 'battleAlarm',
+              name: 'Battle Alarms',
+              description: 'Audio alerts for important battles',
+              category: 'Quality of Life'
             }
           ]
         },
         lupus: {
-          title: 'Lupus Enhancements',
+          title: 'Lupus Extended',
           icon: '🚀',
-          categories: [
+          description: 'Advanced features and automation',
+          features: [
             {
-              name: 'Advanced Features',
-              features: [
-                { id: 'fastActions', name: 'Fast Actions', description: 'Speed up common actions' },
-                { id: 'autoRefresh', name: 'Auto Refresh', description: 'Automatic page refresh' },
-                { id: 'customThemes', name: 'Custom Themes', description: 'Additional theme options' },
-                { id: 'advancedStats', name: 'Advanced Stats', description: 'Detailed statistics tracking' },
-                { id: 'bulkActions', name: 'Bulk Actions', description: 'Perform bulk operations' }
-              ]
+              id: 'fastActions',
+              name: 'Fast Actions',
+              description: 'Speed up common actions',
+              category: 'Automation'
+            },
+            {
+              id: 'autoRefresh',
+              name: 'Auto Refresh',
+              description: 'Automatic page refresh at intervals',
+              category: 'Automation'
+            },
+            {
+              id: 'battlePass',
+              name: 'Battle Pass Tracker',
+              description: 'Track and display battle pass progress',
+              category: 'Tracking'
+            },
+            {
+              id: 'customThemes',
+              name: 'Custom Themes',
+              description: 'Additional theme customization options',
+              category: 'Advanced'
+            },
+            {
+              id: 'advancedStats',
+              name: 'Advanced Statistics',
+              description: 'Detailed statistics and analytics',
+              category: 'Advanced'
+            },
+            {
+              id: 'bulkActions',
+              name: 'Bulk Actions',
+              description: 'Perform operations on multiple items',
+              category: 'Advanced'
+            }
+          ]
+        },
+        asura: {
+          title: 'Asura Professional',
+          icon: '⚡',
+          description: 'Professional-grade tools and AI features',
+          features: [
+            {
+              id: 'aiRecommendations',
+              name: 'AI Recommendations',
+              description: 'Intelligent gameplay suggestions',
+              category: 'AI-Powered'
+            },
+            {
+              id: 'predictiveAnalytics',
+              name: 'Predictive Analytics',
+              description: 'Predict battle outcomes and strategies',
+              category: 'AI-Powered'
+            },
+            {
+              id: 'autoOptimization',
+              name: 'Auto Optimization',
+              description: 'Automatically optimize stats and equipment',
+              category: 'AI-Powered'
+            },
+            {
+              id: 'advancedFilters',
+              name: 'Advanced Filters',
+              description: 'Complex filtering and search options',
+              category: 'Professional'
+            },
+            {
+              id: 'exportTools',
+              name: 'Export Tools',
+              description: 'Export data in multiple formats',
+              category: 'Professional'
+            },
+            {
+              id: 'macroSystem',
+              name: 'Macro System',
+              description: 'Create and run custom macros',
+              category: 'Professional'
             }
           ]
         }
       };
     }
 
-    setupAddonSelector() {
-      const cards = document.querySelectorAll('.addon-card');
+    async loadConfig() {
+      const stored = await this.popupController.loadConfig();
       
-      cards.forEach(card => {
-        card.addEventListener('click', () => {
-          const addon = card.getAttribute('data-addon');
-          this.switchAddon(addon);
-        });
-      });
+      // Initialize with defaults if not present
+      this.config.base = stored.base || {};
+      this.config.lupus = stored.lupus || {};
+      this.config.asura = stored.asura || {};
+      
+      console.log('📋 Config loaded:', this.config);
     }
 
-    switchAddon(addon) {
-      this.currentAddon = addon;
+    setupCategorySelector() {
+      const selector = document.getElementById('categorySelector');
+      if (!selector) return;
       
-      document.querySelectorAll('.addon-card').forEach(card => {
-        card.classList.remove('active');
+      selector.innerHTML = Object.keys(this.featureDefinitions).map(key => {
+        const def = this.featureDefinitions[key];
+        return `<option value="${key}">${def.icon} ${def.title}</option>`;
+      }).join('');
+      
+      selector.value = this.currentCategory;
+      
+      selector.addEventListener('change', (e) => {
+        this.currentCategory = e.target.value;
+        this.renderFeatures();
       });
-      document.querySelector(`[data-addon="${addon}"]`)?.classList.add('active');
-      
-      this.renderFeatures();
     }
 
     renderFeatures() {
-      const container = document.getElementById('featureList');
+      const container = document.getElementById('featuresContainer');
       if (!container) return;
       
-      const addonDef = this.featureDefinitions[this.currentAddon];
-      if (!addonDef) return;
+      const def = this.featureDefinitions[this.currentCategory];
       
-      let html = '';
+      // Group features by category
+      const grouped = {};
+      def.features.forEach(feature => {
+        if (!grouped[feature.category]) {
+          grouped[feature.category] = [];
+        }
+        grouped[feature.category].push(feature);
+      });
       
-      addonDef.categories.forEach(category => {
+      let html = `
+        <div class="category-info">
+          <h2>${def.icon} ${def.title}</h2>
+          <p>${def.description}</p>
+        </div>
+      `;
+      
+      Object.keys(grouped).forEach(categoryName => {
         html += `
           <div class="feature-category">
             <div class="category-header">
-              <div class="category-title">${category.name}</div>
+              <div class="category-title">
+                <span class="category-icon">📦</span>
+                ${categoryName}
+              </div>
               <span class="category-toggle">▼</span>
             </div>
             <div class="category-features">
-              ${category.features.map(f => this.renderFeature(f)).join('')}
+              ${grouped[categoryName].map(f => this.renderFeature(f)).join('')}
             </div>
           </div>
         `;
       });
       
       container.innerHTML = html;
+      
+      // Setup toggles
       this.setupFeatureToggles();
       
-      // Use popupController utility for category collapse
+      // Setup category collapse
       this.popupController.setupCategoryCollapse();
     }
 
     renderFeature(feature) {
-      const isEnabled = this.config[this.currentAddon][feature.id] || false;
+      const isEnabled = this.config[this.currentCategory][feature.id] || false;
       
       return `
         <div class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">${feature.name}</div>
+            <div class="feature-name">
+              ${feature.name}
+              <span class="feature-badge ${this.currentCategory}">${this.currentCategory.toUpperCase()}</span>
+            </div>
             <div class="feature-description">${feature.description}</div>
           </div>
           <div class="toggle-switch">
-            <input type="checkbox" id="${feature.id}" ${isEnabled ? 'checked' : ''}>
+            <input type="checkbox" id="${feature.id}" ${isEnabled ? 'checked' : ''} data-namespace="${this.currentCategory}">
             <span class="toggle-slider"></span>
           </div>
         </div>
@@ -151,65 +295,101 @@
     }
 
     setupFeatureToggles() {
-      const addonDef = this.featureDefinitions[this.currentAddon];
-      if (!addonDef) return;
-      
-      const features = {};
-      addonDef.categories.forEach(category => {
-        category.features.forEach(feature => {
-          features[feature.id] = this.config[this.currentAddon][feature.id] || false;
+      document.querySelectorAll('.feature-item input[type="checkbox"]').forEach(toggle => {
+        toggle.addEventListener('change', async (e) => {
+          const featureId = e.target.id;
+          const namespace = e.target.getAttribute('data-namespace');
+          const isEnabled = e.target.checked;
+          
+          console.log(`🔄 Toggle changed: ${namespace}.${featureId} = ${isEnabled}`);
+          
+          // Update local config
+          this.config[namespace][featureId] = isEnabled;
+          
+          // Save to storage
+          const fullConfig = await this.popupController.loadConfig();
+          fullConfig[namespace] = this.config[namespace];
+          await this.popupController.saveConfig('config', fullConfig);
+          
+          // Show feedback
+          this.popupController.showToast(
+            `${this.getFeatureName(featureId)} ${isEnabled ? 'enabled' : 'disabled'}`,
+            'success'
+          );
+          
+          // Notify content script if on demonichunter.com
+          try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab && tab.url && tab.url.includes('demonichunter.com')) {
+              chrome.tabs.sendMessage(tab.id, {
+                type: 'FEATURE_CHANGED',
+                namespace: namespace,
+                featureId: featureId,
+                enabled: isEnabled
+              }).catch(() => {
+                console.log('Could not notify content script (page might need refresh)');
+              });
+            }
+          } catch (error) {
+            console.warn('Could not notify tab:', error);
+          }
         });
       });
-      
-      // Use popupController utility for automatic toggle setup
-      this.popupController.setupFeatureToggles(features, this.currentAddon, (featureId, enabled) => {
-        this.config[this.currentAddon][featureId] = enabled;
-      });
+    }
+
+    getFeatureName(featureId) {
+      for (const category of Object.values(this.featureDefinitions)) {
+        const feature = category.features.find(f => f.id === featureId);
+        if (feature) return feature.name;
+      }
+      return featureId;
     }
 
     setupQuickActions() {
-      document.getElementById('enableAll')?.addEventListener('click', () => this.enableAllFeatures());
-      document.getElementById('disableAll')?.addEventListener('click', () => this.disableAllFeatures());
-      document.getElementById('resetToDefaults')?.addEventListener('click', () => this.resetToDefaults());
-    }
-
-    async enableAllFeatures() {
-      const addonDef = this.featureDefinitions[this.currentAddon];
-      if (!addonDef) return;
-      
-      addonDef.categories.forEach(category => {
-        category.features.forEach(feature => {
-          this.config[this.currentAddon][feature.id] = true;
+      document.getElementById('enableAll')?.addEventListener('click', async () => {
+        const def = this.featureDefinitions[this.currentCategory];
+        
+        def.features.forEach(feature => {
+          this.config[this.currentCategory][feature.id] = true;
+          const toggle = document.getElementById(feature.id);
+          if (toggle) toggle.checked = true;
         });
+        
+        const fullConfig = await this.popupController.loadConfig();
+        fullConfig[this.currentCategory] = this.config[this.currentCategory];
+        await this.popupController.saveConfig('config', fullConfig);
+        
+        this.popupController.showToast('All features enabled', 'success');
       });
       
-      await this.popupController.saveConfig('config', this.config);
-      this.renderFeatures();
-      this.popupController.showToast('All features enabled', 'success');
-    }
-
-    async disableAllFeatures() {
-      const addonDef = this.featureDefinitions[this.currentAddon];
-      if (!addonDef) return;
-      
-      addonDef.categories.forEach(category => {
-        category.features.forEach(feature => {
-          this.config[this.currentAddon][feature.id] = false;
+      document.getElementById('disableAll')?.addEventListener('click', async () => {
+        const def = this.featureDefinitions[this.currentCategory];
+        
+        def.features.forEach(feature => {
+          this.config[this.currentCategory][feature.id] = false;
+          const toggle = document.getElementById(feature.id);
+          if (toggle) toggle.checked = false;
         });
+        
+        const fullConfig = await this.popupController.loadConfig();
+        fullConfig[this.currentCategory] = this.config[this.currentCategory];
+        await this.popupController.saveConfig('config', fullConfig);
+        
+        this.popupController.showToast('All features disabled', 'success');
       });
       
-      await this.popupController.saveConfig('config', this.config);
-      this.renderFeatures();
-      this.popupController.showToast('All features disabled', 'success');
-    }
-
-    async resetToDefaults() {
-      if (!confirm('Reset all settings to defaults? This cannot be undone.')) return;
-      
-      this.config[this.currentAddon] = {};
-      await this.popupController.saveConfig('config', this.config);
-      this.renderFeatures();
-      this.popupController.showToast('Settings reset to defaults', 'success');
+      document.getElementById('resetToDefaults')?.addEventListener('click', async () => {
+        if (!confirm('Reset all settings to defaults? This cannot be undone.')) return;
+        
+        this.config[this.currentCategory] = {};
+        
+        const fullConfig = await this.popupController.loadConfig();
+        fullConfig[this.currentCategory] = {};
+        await this.popupController.saveConfig('config', fullConfig);
+        
+        this.renderFeatures();
+        this.popupController.showToast('Settings reset to defaults', 'success');
+      });
     }
 
     setupExportImport() {

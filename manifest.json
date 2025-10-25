@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Lupus - Addon Manager",
   "version": "0.1.0",
-  "description": "Addon Manager that combines features from the addons by GonBruck and Asura. Manage and use addons for DemonicScans.com in one single extension.",
+  "description": "Addon Manager that combines features from the addons by GonBruck and Asura. Manage and use addons for DemonicScans.org in one single extension.",
   
   "icons": {
     "16": "src/favicon.png",

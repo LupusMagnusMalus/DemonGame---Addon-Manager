@@ -1,56 +1,59 @@
-/* Settings Tab - Only addon card specific styles */
+/* Settings Tab Styles */
 
-.addon-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+.category-info {
+  background: var(--theme-panel-1);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
 }
 
-.addon-card {
-  padding: var(--spacing-lg);
-  background: var(--ctp-surface0);
-  border: 2px solid var(--ctp-surface1);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-normal);
+.category-info h2 {
+  font-size: 18px;
+  color: var(--theme-accent-1);
+  margin-bottom: 8px;
 }
 
-.addon-card:hover {
-  border-color: var(--ctp-mauve);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(203, 166, 247, 0.2);
-}
-
-.addon-card.active {
-  border-color: var(--ctp-green);
-  background: rgba(166, 227, 161, 0.1);
-}
-
-.addon-icon {
-  font-size: 32px;
-  margin-bottom: var(--spacing-sm);
-}
-
-.addon-card h4 {
+.category-info p {
   font-size: 13px;
-  color: var(--ctp-text);
-  margin-bottom: var(--spacing-xs);
-  font-weight: 600;
+  color: var(--theme-text-secondary);
+  line-height: 1.5;
 }
 
-.addon-card p {
-  font-size: 11px;
-  color: var(--ctp-subtext0);
-  margin-bottom: var(--spacing-sm);
+.category-selector {
+  width: 100%;
+  padding: 12px;
+  background: var(--theme-panel-1);
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+  color: var(--theme-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.addon-count {
-  font-size: 10px;
-  color: var(--ctp-overlay0);
-  background: var(--ctp-base);
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  display: inline-block;
+.category-selector:hover {
+  border-color: var(--theme-accent-1);
+}
+
+.category-selector:focus {
+  outline: none;
+  border-color: var(--theme-accent-1);
+  box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.2);
+}
+
+/* Feature badges with category colors */
+.feature-badge.base {
+  background: var(--theme-success);
+  color: var(--theme-background);
+}
+
+.feature-badge.lupus {
+  background: var(--theme-accent-2);
+  color: var(--theme-background);
+}
+
+.feature-badge.asura {
+  background: var(--theme-accent-1);
+  color: var(--theme-background);
 }
