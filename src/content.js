@@ -1,12 +1,13 @@
 // Haupt-Content-Script das alle Module orchestriert
 (async function() {
   'use strict';
-
+/*
   // Import shared utilities
   await import(chrome.runtime.getURL('core/utils.js'));
   await import(chrome.runtime.getURL('core/storage-manager.js'));
   await import(chrome.runtime.getURL('core/feature-manager.js'));
   await import(chrome.runtime.getURL('core/notification-system.js'));
+*/
 
   class AddonManager {
     constructor() {
@@ -267,45 +268,60 @@
 
     async loadScript(path) {
       return new Promise((resolve, reject) => {
-        fetch(chrome.runtime.getURL(path))
-          .then(response => response.text())
-          .then(scriptText => {
-            const script = document.createElement('script');
-            script.textContent = scriptText;
-            script.dataset.enhancementManager = path;
-            document.head.appendChild(script);
-            
-            this.loadedModules.set(path, script);
-            console.log(`✅ Loaded: ${path}`);
-            resolve();
-          })
-          .catch(error => {
-            console.warn(`⚠️ Could not load ${path}:`, error);
-            reject(error);
-          });
+      // Check if already loaded
+      if (this.loadedModules.has(path)) {
+        console.log(`♻️ Script already loaded: ${path}`);
+        resolve();
+        return;
+      }
+    
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL(path);
+      script.dataset.enhancementManager = path;
+    
+      script.onload = () => {
+        this.loadedModules.set(path, script);
+        console.log(`✅ Loaded: ${path}`);
+        resolve();
+      };
+    
+      script.onerror = (error) => {
+        console.warn(`⚠️ Could not load ${path}:`, error);
+        reject(error);
+      };
+    
+      document.head.appendChild(script);
       });
     }
 
     async loadCSS(path) {
       return new Promise((resolve, reject) => {
-        fetch(chrome.runtime.getURL(path))
-          .then(response => response.text())
-          .then(cssText => {
-            const style = document.createElement('style');
-            style.textContent = cssText;
-            style.dataset.enhancementManager = path;
-            document.head.appendChild(style);
-            
-            this.loadedModules.set(path, style);
-            console.log(`✅ Loaded CSS: ${path}`);
-            resolve();
-          })
-          .catch(error => {
-            console.warn(`⚠️ Could not load CSS ${path}:`, error);
-            reject(error);
-          });
-      });
-    }
+      // Check if already loaded
+      if (this.loadedModules.has(path)) {
+        console.log(`♻️ CSS already loaded: ${path}`);
+        resolve();
+        return;
+      }
+    
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = chrome.runtime.getURL(path);
+      link.dataset.enhancementManager = path;
+    
+      link.onload = () => {
+        this.loadedModules.set(path, link);
+        console.log(`✅ Loaded CSS: ${path}`);
+        resolve();
+      };
+    
+      link.onerror = (error) => {
+        console.warn(`⚠️ Could not load CSS ${path}:`, error);
+        reject(error);
+      };
+    
+      document.head.appendChild(link);
+    });
+  }
 
     async cleanup() {
       // Entferne alle geladenen Module

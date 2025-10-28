@@ -34,6 +34,9 @@
       "matches": ["*://*/*"],
       "js": [
         "core/utils.js",
+        "core/storage-manager.js",
+        "core/feature-manager.js",
+        "core/notification-system.js",
         "src/content.js"
       ],
       "css": [
@@ -57,16 +60,23 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "base/modules/*.js",
+        "core/*.js",
+        "core/*.css",
+        "base/core/*.js",
         "base/styles/*.css",
-        "lupus-enhancements/modules/*.js",
-        "lupus-enhancements/styles/*.css",
-        "asura-advanced/modules/*.js",
-        "asura-advanced/styles/*.css",
-        "src/sounds/alarm/*.mp3",
-        "src/favicon.png"
+        "base/modules/*.js",
+        "addons/lupus-enhancements/*.js",
+        "addons/lupus-enhancements/styles/*.css",
+        "addons/lupus-enhancements/modules/*.js",
+        "addons/asura-advanced/styles/*.css",
+        "addons/asura-advanced/modules/*.js",
+        "src/popup/tabs/*.html",
+        "src/popup/tabs/*.css",
+        "src/popup/tabs/*.js",
+        "src/popup/tabs/*.json",
+        "icons/*.png"
       ],
-      "matches": ["*://*/*"]
+      "matches": ["<all_urls>"]
     }
   ]
 }

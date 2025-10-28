@@ -360,9 +360,8 @@ class ColorPalette {
 
 window.ColorPalette = ColorPalette;
 
-// Auto-initialize if in appropriate context
-if (typeof chrome !== 'undefined' && chrome.runtime) {
-  const palette = new ColorPalette();
-  palette.init();
-  window.colorPalette = palette;
+// Export to global scope
+if (typeof window !== 'undefined') {
+  window.GameEnhancement = window.GameEnhancement || {};
+  window.GameEnhancement.ColorPalette = ColorPalette;
 }

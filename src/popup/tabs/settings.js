@@ -1,4 +1,4 @@
-// Settings Tab Controller - Complete Feature Management
+// Settings Tab Controller - Complete with working toggles
 (function() {
   'use strict';
 
@@ -20,178 +20,274 @@
       this.renderFeatures();
       this.setupQuickActions();
       this.setupExportImport();
+      
+      console.log('✅ Settings tab initialized');
     }
 
     getFeatureDefinitions() {
       return {
         base: {
-          title: 'Base Features',
+          title: 'Base Features (GonBruck)',
           icon: '🎮',
-          description: 'Core enhancements and quality-of-life improvements',
+          description: 'Core game enhancements and quality of life improvements',
           features: [
-            {
-              id: 'notificationSystem',
-              name: 'Enhanced Notifications',
-              description: 'Improved notification system with sound alerts',
-              category: 'Core'
+            // Core - WICHTIG: enabled muss existieren!
+            { 
+              id: 'enabled', 
+              name: 'Enable Base Features', 
+              description: 'Master switch for all base features (must be ON)', 
+              category: 'Core',
+              important: true
             },
-            {
-              id: 'itemTooltips',
-              name: 'Item Tooltips',
-              description: 'Detailed item information on hover',
-              category: 'Core'
+            { 
+              id: 'sidebar', 
+              name: 'Enhanced Sidebar', 
+              description: 'Improved sidebar with quick navigation', 
+              category: 'Core' 
             },
-            {
-              id: 'inventoryView',
-              name: 'Inventory Grid/List Toggle',
-              description: 'Switch between grid and list view',
-              category: 'Core'
+            
+            // Wave Page (IDs mit Unterstrichen!)
+            { 
+              id: 'wave_mods', 
+              name: 'Wave Enhancements', 
+              description: 'General wave page improvements', 
+              category: 'Wave' 
             },
-            {
-              id: 'quickActions',
-              name: 'Quick Action Buttons',
-              description: 'Fast action buttons on items',
-              category: 'Core'
+            { 
+              id: 'monster_filters', 
+              name: 'Monster Filters', 
+              description: 'Filter monsters by HP, level, type', 
+              category: 'Wave' 
             },
-            {
-              id: 'battleEnhancements',
-              name: 'Battle Interface',
-              description: 'Enhanced battle UI and information',
-              category: 'Battle'
+            { 
+              id: 'loot_collection', 
+              name: 'Quick Loot Collection', 
+              description: 'Fast loot collection tools', 
+              category: 'Wave' 
             },
-            {
-              id: 'statsDisplay',
-              name: 'Stats Display',
-              description: 'Improved statistics visualization',
-              category: 'Battle'
+            { 
+              id: 'gate_collapse', 
+              name: 'Collapsible Gates', 
+              description: 'Collapse/expand gate sections', 
+              category: 'Wave' 
             },
-            {
-              id: 'pvpEnhancements',
-              name: 'PvP Enhancements',
-              description: 'Better PvP interface and tracking',
-              category: 'Battle'
+            
+            // Battle
+            { 
+              id: 'battle_mods', 
+              name: 'Battle Enhancements', 
+              description: 'Enhanced battle interface and information', 
+              category: 'Battle' 
             },
-            {
-              id: 'petSummary',
-              name: 'Pet Summary',
-              description: 'Pet statistics and food calculator',
-              category: 'Quality of Life'
+            
+            // Inventory
+            { 
+              id: 'inventory_mods', 
+              name: 'Inventory Enhancements', 
+              description: 'Improved inventory management', 
+              category: 'Inventory' 
             },
-            {
-              id: 'eventTracking',
-              name: 'Event Tracking',
-              description: 'Track active events and timers',
-              category: 'Quality of Life'
+            
+            // Stats
+            { 
+              id: 'stats_mods', 
+              name: 'Stats Display', 
+              description: 'Enhanced statistics visualization', 
+              category: 'Stats' 
             },
-            {
-              id: 'monsterFilters',
-              name: 'Monster Filters',
-              description: 'Filter monsters by various criteria',
-              category: 'Quality of Life'
+            
+            // PvP
+            { 
+              id: 'pvp_mods', 
+              name: 'PvP Enhancements', 
+              description: 'Better PvP interface and tracking', 
+              category: 'PvP' 
             },
-            {
-              id: 'lootCollection',
-              name: 'Quick Loot Collection',
-              description: 'Fast loot collection tools',
-              category: 'Quality of Life'
+            
+            // Pets
+            { 
+              id: 'pets_mods', 
+              name: 'Pet Management', 
+              description: 'Pet statistics and management tools', 
+              category: 'Pets' 
             },
-            {
-              id: 'gateCollapse',
-              name: 'Collapsible Gates',
-              description: 'Collapse/expand gate sections',
-              category: 'Quality of Life'
+            
+            // Other
+            { 
+              id: 'event_mods', 
+              name: 'Event Tracking', 
+              description: 'Track active events and timers', 
+              category: 'Other' 
             },
-            {
-              id: 'battleAlarm',
-              name: 'Battle Alarms',
-              description: 'Audio alerts for important battles',
-              category: 'Quality of Life'
+            { 
+              id: 'merchant_mods', 
+              name: 'Merchant Enhancements', 
+              description: 'Improved merchant interface', 
+              category: 'Other' 
+            },
+            { 
+              id: 'blacksmith_mods', 
+              name: 'Blacksmith Enhancements', 
+              description: 'Better blacksmith tools', 
+              category: 'Other' 
+            },
+            { 
+              id: 'legendary_forge_mods', 
+              name: 'Legendary Forge', 
+              description: 'Legendary forge improvements', 
+              category: 'Other' 
             }
           ]
         },
         lupus: {
-          title: 'Lupus Extended',
+          title: 'Lupus Enhancements',
           icon: '🚀',
           description: 'Advanced features and automation',
           features: [
-            {
-              id: 'fastActions',
-              name: 'Fast Actions',
-              description: 'Speed up common actions',
-              category: 'Automation'
+            // Core
+            { 
+              id: 'enabled', 
+              name: 'Enable Lupus Features', 
+              description: 'Master switch for all Lupus enhancements', 
+              category: 'Core',
+              important: true
             },
-            {
-              id: 'autoRefresh',
-              name: 'Auto Refresh',
-              description: 'Automatic page refresh at intervals',
-              category: 'Automation'
+            
+            // Interface (IDs in camelCase!)
+            { 
+              id: 'enhancedSidebar', 
+              name: 'Enhanced Sidebar', 
+              description: 'Enhanced sidebar with submenus', 
+              category: 'Interface' 
             },
-            {
-              id: 'battlePass',
-              name: 'Battle Pass Tracker',
-              description: 'Track and display battle pass progress',
-              category: 'Tracking'
+            { 
+              id: 'submenus', 
+              name: 'Submenu System', 
+              description: 'Advanced submenu navigation', 
+              category: 'Interface' 
             },
-            {
-              id: 'customThemes',
-              name: 'Custom Themes',
-              description: 'Additional theme customization options',
-              category: 'Advanced'
+            { 
+              id: 'rankDetection', 
+              name: 'Rank Detection', 
+              description: 'Automatic rank detection and display', 
+              category: 'Interface' 
             },
-            {
-              id: 'advancedStats',
-              name: 'Advanced Statistics',
-              description: 'Detailed statistics and analytics',
-              category: 'Advanced'
+            { 
+              id: 'timeFormat24h', 
+              name: '24-Hour Time Format', 
+              description: 'Display server time in 24-hour format', 
+              category: 'Interface' 
             },
-            {
-              id: 'bulkActions',
-              name: 'Bulk Actions',
-              description: 'Perform operations on multiple items',
-              category: 'Advanced'
+            
+            // Automation
+            { 
+              id: 'levelGateSwitch', 
+              name: 'Level-based Gate Switching', 
+              description: 'Automatically switch gates based on level', 
+              category: 'Automation' 
+            },
+            
+            // Battle Pass
+            { 
+              id: 'battlePass', 
+              name: 'Battle Pass Scroll', 
+              description: 'Enable smooth horizontal scrolling on battle pass page', 
+              category: 'Battle Pass' 
             }
           ]
         },
         asura: {
-          title: 'Asura Professional',
+          title: 'Asura Advanced',
           icon: '⚡',
-          description: 'Professional-grade tools and AI features',
+          description: 'Professional-grade tools and advanced features',
           features: [
-            {
-              id: 'aiRecommendations',
-              name: 'AI Recommendations',
-              description: 'Intelligent gameplay suggestions',
-              category: 'AI-Powered'
+            // Core
+            { 
+              id: 'enabled', 
+              name: 'Enable Asura Features', 
+              description: 'Master switch for all Asura features', 
+              category: 'Core',
+              important: true
             },
-            {
-              id: 'predictiveAnalytics',
-              name: 'Predictive Analytics',
-              description: 'Predict battle outcomes and strategies',
-              category: 'AI-Powered'
+            
+            // Interface (IDs in camelCase!)
+            { 
+              id: 'advancedSidebar', 
+              name: 'Advanced Sidebar', 
+              description: 'Professional sidebar (replaces base sidebar)', 
+              category: 'Interface' 
             },
-            {
-              id: 'autoOptimization',
-              name: 'Auto Optimization',
-              description: 'Automatically optimize stats and equipment',
-              category: 'AI-Powered'
+            { 
+              id: 'advancedSettings', 
+              name: 'Advanced Settings Manager', 
+              description: 'Advanced settings and theme system', 
+              category: 'Interface' 
             },
-            {
-              id: 'advancedFilters',
-              name: 'Advanced Filters',
-              description: 'Complex filtering and search options',
-              category: 'Professional'
+            { 
+              id: 'quickAccess', 
+              name: 'Quick Access System', 
+              description: 'Quick access toolbar for common actions', 
+              category: 'Interface' 
             },
-            {
-              id: 'exportTools',
-              name: 'Export Tools',
-              description: 'Export data in multiple formats',
-              category: 'Professional'
+            { 
+              id: 'menuCustomization', 
+              name: 'Menu Customization', 
+              description: 'Customize menu layout and appearance', 
+              category: 'Interface' 
             },
-            {
-              id: 'macroSystem',
-              name: 'Macro System',
-              description: 'Create and run custom macros',
-              category: 'Professional'
+            
+            // Wave Features
+            { 
+              id: 'advancedFilters', 
+              name: 'Advanced Monster Filters', 
+              description: 'Complex filtering and search options', 
+              category: 'Wave' 
+            },
+            { 
+              id: 'lootHighlighting', 
+              name: 'Advanced Loot Highlighting', 
+              description: 'Highlight valuable loot with custom rules', 
+              category: 'Wave' 
+            },
+            
+            // Stats
+            { 
+              id: 'statAllocation', 
+              name: 'Sidebar Stat Allocation', 
+              description: 'Allocate stats directly from sidebar', 
+              category: 'Stats' 
+            },
+            
+            // Automation
+            { 
+              id: 'waveAutoRefresh', 
+              name: 'Wave Auto-Refresh', 
+              description: 'Automatically refresh wave page', 
+              category: 'Automation' 
+            },
+            
+            // PvP
+            { 
+              id: 'battlePrediction', 
+              name: 'Battle Outcome Prediction', 
+              description: 'Predict PvP battle outcomes', 
+              category: 'PvP' 
+            },
+            
+            // Theme
+            { 
+              id: 'customBackgrounds', 
+              name: 'Custom Backgrounds', 
+              description: 'Set custom page backgrounds', 
+              category: 'Theme' 
+            },
+            
+            // Pets
+            { 
+              id: 'petNaming', 
+              name: 'Pet Naming System', 
+              description: 'Give custom names to your pets', 
+              category: 'Pets' 
             }
           ]
         }
@@ -199,19 +295,38 @@
     }
 
     async loadConfig() {
-      const stored = await this.popupController.loadConfig();
-      
-      // Initialize with defaults if not present
-      this.config.base = stored.base || {};
-      this.config.lupus = stored.lupus || {};
-      this.config.asura = stored.asura || {};
-      
-      console.log('📋 Config loaded:', this.config);
+      try {
+        const result = await chrome.storage.local.get(['config']);
+        const stored = result.config || {};
+        
+        // Initialize with defaults
+        this.config.base = stored.base || { enabled: false };
+        this.config.lupus = stored.lupus || { enabled: false };
+        this.config.asura = stored.asura || { enabled: false };
+        
+        console.log('📋 Config loaded:', this.config);
+      } catch (error) {
+        console.error('❌ Failed to load config:', error);
+      }
+    }
+
+    async saveConfig() {
+      try {
+        await chrome.storage.local.set({ config: this.config });
+        console.log('💾 Config saved:', this.config);
+        return true;
+      } catch (error) {
+        console.error('❌ Failed to save config:', error);
+        return false;
+      }
     }
 
     setupCategorySelector() {
       const selector = document.getElementById('categorySelector');
-      if (!selector) return;
+      if (!selector) {
+        console.error('❌ Category selector not found!');
+        return;
+      }
       
       selector.innerHTML = Object.keys(this.featureDefinitions).map(key => {
         const def = this.featureDefinitions[key];
@@ -221,14 +336,20 @@
       selector.value = this.currentCategory;
       
       selector.addEventListener('change', (e) => {
+        console.log('📂 Category changed to:', e.target.value);
         this.currentCategory = e.target.value;
         this.renderFeatures();
       });
+      
+      console.log('✅ Category selector setup complete');
     }
 
     renderFeatures() {
       const container = document.getElementById('featuresContainer');
-      if (!container) return;
+      if (!container) {
+        console.error('❌ Features container not found!');
+        return;
+      }
       
       const def = this.featureDefinitions[this.currentCategory];
       
@@ -267,7 +388,9 @@
       
       container.innerHTML = html;
       
-      // Setup toggles
+      console.log('✅ Features rendered for category:', this.currentCategory);
+      
+      // Setup toggles AFTER rendering
       this.setupFeatureToggles();
       
       // Setup category collapse
@@ -276,120 +399,180 @@
 
     renderFeature(feature) {
       const isEnabled = this.config[this.currentCategory][feature.id] || false;
+      const toggleId = `${this.currentCategory}-${feature.id}`;
       
       return `
-        <div class="feature-item">
+        <div class="feature-item" data-feature-id="${feature.id}">
           <div class="feature-info">
             <div class="feature-name">
               ${feature.name}
-              <span class="feature-badge ${this.currentCategory}">${this.currentCategory.toUpperCase()}</span>
+              ${feature.important ? '<span class="feature-badge">REQUIRED</span>' : ''}
             </div>
             <div class="feature-description">${feature.description}</div>
           </div>
-          <div class="toggle-switch">
-            <input type="checkbox" id="${feature.id}" ${isEnabled ? 'checked' : ''} data-namespace="${this.currentCategory}">
+          <label class="toggle-switch">
+            <input type="checkbox" 
+                   id="${toggleId}" 
+                   data-feature="${feature.id}"
+                   data-namespace="${this.currentCategory}"
+                   ${isEnabled ? 'checked' : ''}>
             <span class="toggle-slider"></span>
-          </div>
+          </label>
         </div>
       `;
     }
 
     setupFeatureToggles() {
-      document.querySelectorAll('.feature-item input[type="checkbox"]').forEach(toggle => {
+      console.log('🔧 Setting up feature toggles...');
+      
+      const toggles = document.querySelectorAll('.feature-item input[type="checkbox"]');
+      console.log(`📊 Found ${toggles.length} toggle switches`);
+      
+      if (toggles.length === 0) {
+        console.error('❌ No toggles found! Check HTML rendering.');
+        return;
+      }
+      
+      toggles.forEach((toggle, index) => {
+        const featureId = toggle.getAttribute('data-feature');
+        const namespace = toggle.getAttribute('data-namespace');
+        const isChecked = toggle.checked;
+        
+        console.log(`Toggle ${index}: ${namespace}.${featureId} = ${isChecked}, id="${toggle.id}"`);
+        
+        // Test if toggle is clickable
+        toggle.addEventListener('click', (e) => {
+          console.log('🖱️ Toggle CLICKED:', namespace, featureId);
+        });
+        
+        // Main change handler
         toggle.addEventListener('change', async (e) => {
-          const featureId = e.target.id;
-          const namespace = e.target.getAttribute('data-namespace');
           const isEnabled = e.target.checked;
           
-          console.log(`🔄 Toggle changed: ${namespace}.${featureId} = ${isEnabled}`);
+          console.log(`🔄 Toggle CHANGED: ${namespace}.${featureId} = ${isEnabled}`);
           
-          // Update local config
+          // Update config
+          if (!this.config[namespace]) {
+            this.config[namespace] = {};
+          }
           this.config[namespace][featureId] = isEnabled;
           
-          // Save to storage
-          const fullConfig = await this.popupController.loadConfig();
-          fullConfig[namespace] = this.config[namespace];
-          await this.popupController.saveConfig('config', fullConfig);
+          // Save
+          const saved = await this.saveConfig();
           
-          // Show feedback
-          this.popupController.showToast(
-            `${this.getFeatureName(featureId)} ${isEnabled ? 'enabled' : 'disabled'}`,
-            'success'
-          );
-          
-          // Notify content script if on demonichunter.com
-          try {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            if (tab && tab.url && tab.url.includes('demonichunter.com')) {
-              chrome.tabs.sendMessage(tab.id, {
-                type: 'FEATURE_CHANGED',
-                namespace: namespace,
-                featureId: featureId,
-                enabled: isEnabled
-              }).catch(() => {
-                console.log('Could not notify content script (page might need refresh)');
-              });
-            }
-          } catch (error) {
-            console.warn('Could not notify tab:', error);
+          if (saved) {
+            this.popupController.showToast(
+              `${this.getFeatureName(featureId)} ${isEnabled ? 'enabled' : 'disabled'}`,
+              'success'
+            );
+            
+            // Notify content script
+            await this.notifyContentScript();
+            
+          } else {
+            // Revert on failure
+            e.target.checked = !isEnabled;
+            this.config[namespace][featureId] = !isEnabled;
+            this.popupController.showToast('Failed to save settings', 'error');
           }
         });
       });
+      
+      console.log('✅ Feature toggles setup complete');
+    }
+
+    async notifyContentScript() {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (!tab || !tab.id) {
+          console.log('ℹ️ No active tab - changes will apply on next page load');
+          return;
+        }
+        
+        console.log(`📤 Sending APPLY_CONFIG to tab ${tab.id}`);
+        console.log('📦 Config being sent:', this.config);
+        
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'APPLY_CONFIG',
+          config: this.config
+        }).then(response => {
+          console.log('✅ Content script responded:', response);
+        }).catch(error => {
+          console.log('⚠️ Content script not responding:', error.message);
+          
+          // Offer reload
+          if (confirm('Settings saved. Reload page to apply changes?')) {
+            chrome.tabs.reload(tab.id);
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ Failed to notify content script:', error);
+      }
     }
 
     getFeatureName(featureId) {
-      for (const category of Object.values(this.featureDefinitions)) {
-        const feature = category.features.find(f => f.id === featureId);
-        if (feature) return feature.name;
-      }
-      return featureId;
+      const def = this.featureDefinitions[this.currentCategory];
+      const feature = def.features.find(f => f.id === featureId);
+      return feature ? feature.name : featureId;
     }
 
     setupQuickActions() {
-      document.getElementById('enableAll')?.addEventListener('click', async () => {
-        const def = this.featureDefinitions[this.currentCategory];
-        
-        def.features.forEach(feature => {
-          this.config[this.currentCategory][feature.id] = true;
-          const toggle = document.getElementById(feature.id);
-          if (toggle) toggle.checked = true;
-        });
-        
-        const fullConfig = await this.popupController.loadConfig();
-        fullConfig[this.currentCategory] = this.config[this.currentCategory];
-        await this.popupController.saveConfig('config', fullConfig);
-        
-        this.popupController.showToast('All features enabled', 'success');
-      });
+      const enableAll = document.getElementById('enableAll');
+      const disableAll = document.getElementById('disableAll');
+      const resetBtn = document.getElementById('resetToDefaults');
       
-      document.getElementById('disableAll')?.addEventListener('click', async () => {
-        const def = this.featureDefinitions[this.currentCategory];
-        
-        def.features.forEach(feature => {
-          this.config[this.currentCategory][feature.id] = false;
-          const toggle = document.getElementById(feature.id);
-          if (toggle) toggle.checked = false;
+      if (enableAll) {
+        enableAll.addEventListener('click', async () => {
+          console.log('⚡ Enable All clicked');
+          
+          const def = this.featureDefinitions[this.currentCategory];
+          
+          def.features.forEach(feature => {
+            this.config[this.currentCategory][feature.id] = true;
+          });
+          
+          await this.saveConfig();
+          this.renderFeatures();
+          this.popupController.showToast(`All ${this.currentCategory} features enabled`, 'success');
+          await this.notifyContentScript();
         });
-        
-        const fullConfig = await this.popupController.loadConfig();
-        fullConfig[this.currentCategory] = this.config[this.currentCategory];
-        await this.popupController.saveConfig('config', fullConfig);
-        
-        this.popupController.showToast('All features disabled', 'success');
-      });
+      }
       
-      document.getElementById('resetToDefaults')?.addEventListener('click', async () => {
-        if (!confirm('Reset all settings to defaults? This cannot be undone.')) return;
-        
-        this.config[this.currentCategory] = {};
-        
-        const fullConfig = await this.popupController.loadConfig();
-        fullConfig[this.currentCategory] = {};
-        await this.popupController.saveConfig('config', fullConfig);
-        
-        this.renderFeatures();
-        this.popupController.showToast('Settings reset to defaults', 'success');
-      });
+      if (disableAll) {
+        disableAll.addEventListener('click', async () => {
+          console.log('⛔ Disable All clicked');
+          
+          const def = this.featureDefinitions[this.currentCategory];
+          
+          def.features.forEach(feature => {
+            this.config[this.currentCategory][feature.id] = false;
+          });
+          
+          await this.saveConfig();
+          this.renderFeatures();
+          this.popupController.showToast(`All ${this.currentCategory} features disabled`, 'success');
+          await this.notifyContentScript();
+        });
+      }
+      
+      if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+          if (!confirm('Reset all settings to defaults? This cannot be undone.')) return;
+          
+          console.log('🔄 Reset to Defaults clicked');
+          
+          this.config[this.currentCategory] = { enabled: false };
+          await this.saveConfig();
+          
+          this.renderFeatures();
+          this.popupController.showToast('Settings reset to defaults', 'success');
+          await this.notifyContentScript();
+        });
+      }
+      
+      console.log('✅ Quick actions setup complete');
     }
 
     setupExportImport() {
@@ -399,35 +582,50 @@
       
       if (exportBtn) {
         exportBtn.addEventListener('click', () => {
-          this.popupController.exportConfig(this.config);
+          console.log('📤 Export clicked');
+          this.popupController.exportConfig(this.config, `lupus-config-${Date.now()}.json`);
         });
       }
       
       if (importBtn && importFile) {
-        importBtn.addEventListener('click', () => importFile.click());
+        importBtn.addEventListener('click', () => {
+          console.log('📥 Import clicked');
+          importFile.click();
+        });
         
         importFile.addEventListener('change', async (e) => {
           const file = e.target.files[0];
-          if (file) {
-            const imported = await this.popupController.importConfig(file);
-            if (imported) {
-              this.config = imported;
-              await this.popupController.saveConfig('config', this.config);
-              this.renderFeatures();
-            }
+          if (!file) return;
+          
+          console.log('📂 File selected:', file.name);
+          
+          const imported = await this.popupController.importConfig(file);
+          if (imported) {
+            this.config = imported;
+            await this.saveConfig();
+            this.renderFeatures();
+            this.popupController.showToast('Configuration imported successfully', 'success');
+            await this.notifyContentScript();
           }
+          
+          // Reset file input
+          importFile.value = '';
         });
       }
+      
+      console.log('✅ Export/Import setup complete');
     }
   }
 
   // Export
   window.init_settings = async function(popupController) {
+    console.log('🎬 Initializing Settings controller...');
     const controller = new SettingsController();
     await controller.init(popupController);
   };
 
   window.cleanup_settings = function() {
-    console.log('⚙️ Cleaning up Settings tab');
+    console.log('🧹 Cleaning up Settings tab');
   };
+  
 })();
