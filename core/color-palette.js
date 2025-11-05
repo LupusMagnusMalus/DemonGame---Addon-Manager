@@ -364,4 +364,8 @@ window.ColorPalette = ColorPalette;
 if (typeof window !== 'undefined') {
   window.GameEnhancement = window.GameEnhancement || {};
   window.GameEnhancement.ColorPalette = ColorPalette;
+  
+  // Create instance for immediate use
+  const palette = new ColorPalette();
+  window.colorPalette = palette;
 }

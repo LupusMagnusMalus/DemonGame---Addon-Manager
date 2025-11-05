@@ -11,7 +11,10 @@
     const favicon = document.createElement('link');
     favicon.rel = 'icon';
     favicon.type = 'image/png';
-    favicon.href = chrome.runtime.getURL('src/favicon.png');
+    const faviconUrl = (typeof chrome !== 'undefined' && chrome.runtime) 
+      ? chrome.runtime.getURL('src/favicon.png')
+      : 'src/favicon.png';
+    favicon.href = faviconUrl;
     
     document.head.appendChild(favicon);
     console.log('✅ Favicon fixed');

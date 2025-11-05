@@ -1,45 +1,45 @@
-// Battle Pass - Enable scroll function when on battle_pass.php
+// Battle Pass - Execute scroll after page fully loaded
 (function() {
   'use strict';
 
-  class BattlePass {
-    constructor() {
-      this.enabled = false;
-    }
+  console.log('🎯 Battle Pass module loaded');
 
-    async init() {
-      // Check if we're on battle pass page
-      if (!window.location.href.includes('battle_pass.php')) {
-        return;
-      }
-      
-      // Load config
-      await this.loadConfig();
-      
-      if (!this.enabled) {
-        return;
-      }
-      
-      // Call the scroll function
-      if (typeof window.ProgressTrackScrollAction === 'function') {
-        window.ProgressTrackScrollAction();
-      }
-    }
-
-    async loadConfig() {
-      try {
-        const result = await chrome.storage.local.get(['config']);
-        if (result.config?.lupus?.battlePass) {
-          this.enabled = true;
-        }
-      } catch (error) {
-        console.error('Battle Pass config load error:', error);
-      }
-    }
+  // Check if we're on battle pass page
+  if (!window.location.href.includes('battle_pass.php')) {
+    console.log('🎯 Not on battle_pass.php, skipping');
+    return;
   }
 
-  // Auto-initialize
-  const battlePass = new BattlePass();
-  battlePass.init();
+  console.log('🎯 On battle_pass.php - waiting for page to be fully loaded...');
+
+  // Wait for page to be fully loaded and stable
+  function waitForPageStable() {
+    return new Promise((resolve) => {
+      // Wait for DOM content loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          console.log('🎯 DOMContentLoaded fired');
+          // Wait additional 2 seconds for any post-load scrolling to finish
+          setTimeout(resolve, 2000);
+        });
+      } else {
+        console.log('🎯 DOM already ready');
+        // Page already loaded, wait 2 seconds for stability
+        setTimeout(resolve, 2000);
+      }
+    });
+  }
+
+  // Execute scroll function when stable
+  waitForPageStable().then(() => {
+    console.log('🎯 Page stable, executing ProgressTrackScrollAction()');
+    
+    if (typeof window.ProgressTrackScrollAction === 'function') {
+      window.ProgressTrackScrollAction();
+      console.log('✅ ProgressTrackScrollAction executed successfully');
+    } else {
+      console.error('❌ ProgressTrackScrollAction function not found!');
+    }
+  });
 
 })();

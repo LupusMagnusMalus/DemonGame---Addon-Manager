@@ -37,35 +37,61 @@
 
     async initialize() {
       console.log('🎮 Initializing Game Enhancement Manager v3.0');
-      
+  
       // Prüfe ob wir auf der Game-Seite sind
       if (!document.querySelector('.game-topbar')) {
         console.log('Not on game page, skipping initialization');
         return;
       }
 
-      // Lade Konfiguration
-      const config = await this.getActiveConfig();
-      await this.applyConfiguration(config);
-      
-      // Message Listener für Popup
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        this.handleMessage(message, sender, sendResponse);
-      });
+      try {
+        // Lade Konfiguration
+        const config = await this.getActiveConfig();
+        await this.applyConfiguration(config);
+    
+        // Message Listener für Popup
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+          this.handleMessage(message, sender, sendResponse);
+          return true; // Keep channel open
+        });
 
-      console.log('✅ Game Enhancement Manager initialized');
+        console.log('✅ Game Enhancement Manager initialized');
+    
+      } catch (error) {
+        console.error('❌ Initialization error:', error);
+        // Extension läuft trotzdem weiter
+      }
     }
 
     async getActiveConfig() {
-      const StorageManager = window.GameEnhancement.StorageManager;
-      return await StorageManager.getConfiguration();
+      try {
+        const result = await chrome.storage.local.get(['config']);
+        console.log('📥 Raw storage result:', result);
+    
+        const config = result.config || { 
+          base: { enabled: false }, 
+          lupus: { enabled: false }, 
+          asura: { enabled: false } 
+        };
+    
+        console.log('📋 Parsed config:', config);
+        return config;
+    
+      } catch (error) {
+        console.error('❌ Failed to load config:', error);
+        return { 
+          base: { enabled: false }, 
+          lupus: { enabled: false }, 
+          asura: { enabled: false } 
+        };
+      }
     }
 
     async applyConfiguration(config) {
       console.log('🔧 Applying configuration:', config);
       
       // Cleanup vorherige Module
-      await this.cleanup();
+      //await this.cleanup();
       
       // Core Features (immer aktiv)
       await this.loadCoreFeatures();
@@ -77,7 +103,10 @@
       
       // Lupus Enhancements
       if (config.lupus && config.lupus.enabled) {
+        console.log('🚀 Starting to load Lupus features...'); // ← DEBUG LOG HINZUFÜGEN
         await this.loadLupusFeatures(config.lupus);
+      } else {
+        console.log('⚠️ Lupus disabled or not in config:', config.lupus); // ← DEBUG LOG
       }
       
       // Asura Advanced Features
@@ -90,8 +119,14 @@
         await this.applyTheme(config.theme);
       }
 
+      console.log('🔧 Applying configuration:', config);
+      console.log('📊 Config details:');
+      console.log('  - lupus:', config.lupus);
+      console.log('  - lupus.enabled:', config.lupus?.enabled);
+      console.log('  - lupus.battlePass:', config.lupus?.battlePass);
+
       this.config = config;
-    }
+    };
 
     async loadCoreFeatures() {
       // Immer geladene Core-Features
@@ -139,41 +174,62 @@
     }
 
     async loadLupusFeatures(lupusConfig) {
-      await this.loadCSS('addons/lupus-enhancements/styles/enhanced-sidebar.css');
-
+      console.log('🚀 Loading Lupus features:', Object.keys(lupusConfig).filter(k => lupusConfig[k]));
+  
+      // Helper function to safely load optional files
+      const tryLoad = async (loadFn, path, type = 'file') => {
+        try {
+          await loadFn(path);
+        } catch (error) {
+          console.log(`ℹ️ Optional ${type} not found: ${path}`);
+        }
+      };
+  
+      // Enhanced Sidebar CSS (optional)
+      await tryLoad(this.loadCSS.bind(this), 'addons/lupus-enhancements/styles/enhanced-sidebar.css', 'CSS');
+  
       // Enhanced Sidebar mit Submenus
       if (lupusConfig.enhancedSidebar) {
-        await this.loadScript('addons/lupus-enhancements/modules/enhanced-sidebar.js');
+        await tryLoad(this.loadScript.bind(this), 'addons/lupus-enhancements/modules/enhanced-sidebar.js', 'script');
       }
 
       // Submenu System
       if (lupusConfig.submenus) {
-        await this.loadCSS('addons/lupus-enhancements/styles/submenu.css');
-        await this.loadScript('addons/lupus-enhancements/modules/submenu-manager.js');
+        await tryLoad(this.loadCSS.bind(this), 'addons/lupus-enhancements/styles/submenu.css', 'CSS');
+        await tryLoad(this.loadScript.bind(this), 'addons/lupus-enhancements/modules/submenu-manager.js', 'script');
       }
 
       // Rank Detection
       if (lupusConfig.rankDetection) {
-        await this.loadCSS('addons/lupus-enhancements/styles/rank-detection.css');
-        await this.loadScript('addons/lupus-enhancements/modules/rank-detection.js');
+        await tryLoad(this.loadCSS.bind(this), 'addons/lupus-enhancements/styles/rank-detection.css', 'CSS');
+        await tryLoad(this.loadScript.bind(this), 'addons/lupus-enhancements/modules/rank-detection.js', 'script');
       }
 
-      // 24h Time Format (popup-gesteuert)
+      // 24h Time Format
       if (lupusConfig.timeFormat24h) {
-        await this.loadCSS('addons/lupus-enhancements/styles/server-time.css');
-        await this.loadScript('base/core/time-format.js');
-        await this.loadScript('addons/lupus-enhancements/modules/server-time-display.js');
+        await tryLoad(this.loadCSS.bind(this), 'addons/lupus-enhancements/styles/server-time.css', 'CSS');
+        await tryLoad(this.loadScript.bind(this), 'base/core/time-format.js', 'script');
+        await tryLoad(this.loadScript.bind(this), 'addons/lupus-enhancements/modules/server-time-display.js', 'script');
       }
 
       // Level-based Gate Switching
       if (lupusConfig.levelGateSwitch) {
-        await this.loadScript('addons/lupus-enhancements/modules/level-gate-switch.js');
+        await tryLoad(this.loadScript.bind(this), 'addons/lupus-enhancements/modules/level-gate-switch.js', 'script');
       }
 
+      // Battle Pass
       if (lupusConfig.battlePass) {
-        await this.loadScript('addons/lupus-enhancements/progressTrackScrollAction.js');
-        await this.loadScript('addons/lupus-enhancements/battle-pass.js');
+        console.log('🎯 Loading Battle Pass module...');
+        try {
+          await this.loadScript('addons/lupus-enhancements/modules/progressTrackScrollAction.js');
+          await this.loadScript('addons/lupus-enhancements/modules/battle-pass.js');
+          console.log('✅ Battle Pass modules loaded');
+        } catch (error) {
+          console.error('❌ Failed to load Battle Pass:', error);
+        }
       }
+  
+      console.log('✅ Lupus features loading completed');
     }
 
     async loadAsuraFeatures(asuraConfig) {
@@ -255,73 +311,98 @@
     }
 
     async applyTheme(themeConfig) {
+      // Check if ColorPalette exists
+      if (!window.GameEnhancement || !window.GameEnhancement.ColorPalette) {
+        console.warn('⚠️ ColorPalette not available, skipping theme application');
+        return;
+      }
+  
       const ColorPalette = window.GameEnhancement.ColorPalette;
-      
-      if (themeConfig.sidebarColor) {
+  
+      if (themeConfig.sidebarColor && ColorPalette.applySidebarColor) {
         ColorPalette.applySidebarColor(themeConfig.sidebarColor);
       }
-      
-      if (themeConfig.backgroundColor) {
+  
+      if (themeConfig.backgroundColor && ColorPalette.applyBackgroundColor) {
         ColorPalette.applyBackgroundColor(themeConfig.backgroundColor);
       }
     }
 
     async loadScript(path) {
       return new Promise((resolve, reject) => {
-      // Check if already loaded
-      if (this.loadedModules.has(path)) {
-        console.log(`♻️ Script already loaded: ${path}`);
-        resolve();
-        return;
-      }
+        // Check if already loaded
+        if (this.loadedModules.has(path)) {
+          console.log(`♻️ Script already loaded: ${path}`);
+          resolve();
+          return;
+        }
     
-      const script = document.createElement('script');
-      script.src = chrome.runtime.getURL(path);
-      script.dataset.enhancementManager = path;
+        // Check if script tag already exists
+        const existingScript = document.querySelector(`script[data-enhancement-manager="${path}"]`);
+        if (existingScript) {
+          console.log(`♻️ Script tag exists: ${path}`);
+          this.loadedModules.set(path, existingScript);
+          resolve();
+          return;
+        }
     
-      script.onload = () => {
-        this.loadedModules.set(path, script);
-        console.log(`✅ Loaded: ${path}`);
-        resolve();
-      };
+        const script = document.createElement('script');
+        script.src = chrome.runtime.getURL(path);
+        script.dataset.enhancementManager = path;
     
-      script.onerror = (error) => {
-        console.warn(`⚠️ Could not load ${path}:`, error);
-        reject(error);
-      };
+        script.onload = () => {
+          this.loadedModules.set(path, script);
+          console.log(`✅ Loaded: ${path}`);
+          resolve();
+        };
     
-      document.head.appendChild(script);
+        script.onerror = (error) => {
+          console.warn(`⚠️ Could not load ${path}`);
+          reject(error); // ← Reject, damit try-catch funktioniert
+        };
+    
+        document.head.appendChild(script);
       });
     }
 
     async loadCSS(path) {
       return new Promise((resolve, reject) => {
-      // Check if already loaded
-      if (this.loadedModules.has(path)) {
-        console.log(`♻️ CSS already loaded: ${path}`);
-        resolve();
-        return;
-      }
+        // Check if already loaded
+        if (this.loadedModules.has(path)) {
+          console.log(`♻️ CSS already loaded: ${path}`);
+          resolve();
+          return;
+        }
     
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = chrome.runtime.getURL(path);
-      link.dataset.enhancementManager = path;
+        // Check if link tag already exists
+        const existingLink = document.querySelector(`link[data-enhancement-manager="${path}"]`);
+        if (existingLink) {
+          console.log(`♻️ CSS link exists: ${path}`);
+          this.loadedModules.set(path, existingLink);
+          resolve();
+          return;
+        }
     
-      link.onload = () => {
-        this.loadedModules.set(path, link);
-        console.log(`✅ Loaded CSS: ${path}`);
-        resolve();
-      };
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = chrome.runtime.getURL(path);
+        link.dataset.enhancementManager = path;
     
-      link.onerror = (error) => {
-        console.warn(`⚠️ Could not load CSS ${path}:`, error);
-        reject(error);
-      };
+        link.onload = () => {
+          this.loadedModules.set(path, link);
+          console.log(`✅ Loaded CSS: ${path}`);
+          resolve();
+        };
     
-      document.head.appendChild(link);
-    });
-  }
+        link.onerror = (error) => {
+          console.warn(`⚠️ Could not load CSS ${path}:`, error);
+          // Don't reject - CSS is often optional
+          resolve(); // ← WICHTIG: resolve statt reject!
+        };
+    
+        document.head.appendChild(link);
+      });
+    }
 
     async cleanup() {
       // Entferne alle geladenen Module

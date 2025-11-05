@@ -167,17 +167,66 @@
     }
 
     applyBasicStyles() {
-      // Body adjustments
-      document.body.style.paddingTop = "55px";
-      document.body.style.paddingLeft = "200px";
-      document.body.style.margin = "0px";
-
-      // Apply current theme
-      const currentTheme = window.GameEnhancement?.ColorPalette?.getCurrentTheme();
-      if (currentTheme) {
-        window.GameEnhancement.ColorPalette.applySidebarColor(currentTheme.sidebar);
-        window.GameEnhancement.ColorPalette.applyBackgroundColor(currentTheme.background);
+      // Get theme with comprehensive fallback
+      let themeColors = {
+        sidebar: '#1e1e2e',
+        background: '#11111b',
+        text: '#cdd6f4',
+        textSecondary: '#6c7086',
+        accent: '#cba6f7',
+        border: '#313244'
+      };
+  
+      // Try to get theme from ColorPalette if available
+      try {
+        if (window.GameEnhancement && 
+            window.GameEnhancement.ColorPalette && 
+            typeof window.GameEnhancement.ColorPalette.getCurrentTheme === 'function') {
+          const customTheme = window.GameEnhancement.ColorPalette.getCurrentTheme();
+          if (customTheme) {
+            themeColors = { ...themeColors, ...customTheme };
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not get theme from ColorPalette, using defaults:', error);
       }
+  
+      // Apply styles to sidebar
+      if (this.sidebar) {
+        this.sidebar.style.backgroundColor = themeColors.sidebar;
+        this.sidebar.style.color = themeColors.text;
+        this.sidebar.style.borderRight = `1px solid ${themeColors.border}`;
+      }
+  
+      // Apply styles to menu items
+      const menuItems = this.sidebar?.querySelectorAll('.menu-item');
+      if (menuItems) {
+        menuItems.forEach(item => {
+          item.style.color = themeColors.text;
+          item.style.transition = 'all 0.2s ease';
+      
+          item.addEventListener('mouseenter', () => {
+            item.style.backgroundColor = themeColors.accent + '20'; // 20 = 12% opacity
+            item.style.color = themeColors.accent;
+          });
+      
+          item.addEventListener('mouseleave', () => {
+            item.style.backgroundColor = 'transparent';
+            item.style.color = themeColors.text;
+          });
+        });
+      }
+  
+      // Apply styles to category headers
+      const categoryHeaders = this.sidebar?.querySelectorAll('.category-header');
+      if (categoryHeaders) {
+        categoryHeaders.forEach(header => {
+          header.style.color = themeColors.textSecondary;
+          header.style.borderBottom = `1px solid ${themeColors.border}`;
+        });
+      }
+  
+      console.log('✅ Sidebar styles applied with theme:', themeColors);
     }
 
     setupEventListeners() {

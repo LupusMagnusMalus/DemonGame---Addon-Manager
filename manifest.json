@@ -68,6 +68,7 @@
         "addons/lupus-enhancements/*.js",
         "addons/lupus-enhancements/styles/*.css",
         "addons/lupus-enhancements/modules/*.js",
+        "addons/asura-advanced/*.js",
         "addons/asura-advanced/styles/*.css",
         "addons/asura-advanced/modules/*.js",
         "src/popup/tabs/*.html",
