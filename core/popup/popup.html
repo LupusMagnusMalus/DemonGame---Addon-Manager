@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lupus Addon Manager</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="components/color-picker.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="popup-header">
+    <div class="header-title">
+      <div class="extension-icon"><img src="../favicon.png" alt="🐺" loading="lazy" height="50" width="50"></div>
+      
+      <div>
+        <h1>Addon Manager</h1>
+        <span class="header-subtitle">Control Center</span>
+        <span class="header-subtitle">By Lupus</span>
+      </div>
+    </div>
+    <span class="header-version" id="headerVersion">v0.0.0</span>
+  </header>
+
+  <!-- Tab Navigation (populated dynamically) -->
+  <nav class="tab-navigation" id="tabNavigation">
+    <!-- Tabs inserted by JS -->
+  </nav>
+
+  <!-- Tab Content Container -->
+  <main id="tabContent">
+    <div class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Initializing...</div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="popup-footer">
+    <div class="footer-status">
+      <span class="status-indicator"></span>
+      <span>Loading...</span> <!-- Dieser span wird aktualisiert -->
+    </div>
+    <div class="footer-actions">
+      <button class="footer-button" id="refreshStatus" title="Refresh Status">🔄</button>
+      <button class="footer-button" id="openHelp" title="Help">❓</button>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container"></div>
+
+  <!-- Scripts - Lade ColorPalette zuerst! -->
+  <script src="../../core/color-palette.js"></script>
+  <script src="tab-loader.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

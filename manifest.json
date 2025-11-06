@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "DemonGame Addon Manager",
+  "version": "0.1.0",
+  "description": "A modular browser extension combining the best features from GonBruck, Lupus, and Asura addons for the Demonic Scans game.",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "*://demonicscans.org/*",
+    "*://*.demonicscans.org/*"
+  ],
+  
+  "background": {
+    "service_worker": "core/background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "*://demonicscans.org/*",
+        "*://*.demonicscans.org/*"
+      ],
+      "js": ["core/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  
+  "action": {
+    "default_popup": "core/popup/popup.html",
+    "default_title": "DemonGame Addon Manager",
+    "default_icon": {
+      "16": "core/icons/icon-16.png",
+      "48": "core/icons/icon-48.png",
+      "128": "core/icons/icon-128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "core/icons/icon-16.png",
+    "48": "core/icons/icon-48.png",
+    "128": "core/icons/icon-128.png"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "modules/*/*",
+        "styles/*",
+        "core/sounds/*"
+      ],
+      "matches": [
+        "*://demonicscans.org/*",
+        "*://*.demonicscans.org/*"
+      ]
+    }
+  ]
+}
