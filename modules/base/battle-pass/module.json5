@@ -1,0 +1,43 @@
+{
+  "name": "Battle Pass Auto-Scroll",
+  "version": "1.2.0",
+  "category": "base",
+  "description": "Automatically scrolls to your current battle pass progress when visiting the battle pass page",
+  "author": "LupusMagnus",
+  "pages": ["battle_pass.php"],
+  "loadOn": "domready",
+  "priority": 10,
+  "files": {
+    "main": "battle-pass.js",
+    "scripts": ["progressTrackScrollAction.js"],
+    "styles": ["styles.css"]
+  },
+  "settings": {
+    "scrollDelay": {
+      "type": "number",
+      "default": 2000,
+      "min": 0,
+      "max": 10000,
+      "step": 100,
+      "label": "Scroll Delay (ms)",
+      "description": "Time to wait before scrolling to allow page stabilization"
+    },
+    "scrollTarget": {
+      "type": "select",
+      "default": "current",
+      "options": [
+        { "value": "current", "label": "Current Progress" },
+        { "value": "next", "label": "Next Unlockable" },
+        { "value": "start", "label": "Always Start" }
+      ],
+      "label": "Scroll Target Position"
+    },
+    "showAnimation": {
+      "type": "boolean",
+      "default": true,
+      "label": "Show Scroll Animation"
+    }
+  },
+  "icon": "🎯",
+  "tags": ["quality-of-life", "automation", "battle-pass"]
+}

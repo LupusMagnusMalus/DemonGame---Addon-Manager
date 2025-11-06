@@ -1,0 +1,26 @@
+{
+  "name": "24-Hour Time Format",
+  "version": "1.1.0",
+  "category": "base",
+  "description": "Convert server time display to 24-hour format for better readability",
+  "author": "LupusMagnus",
+  "loadOn": "domready",
+  "priority": 5,
+  "files": {
+    "styles": ["styles.css"]
+  },
+  "settings": {
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "label": "Use 24-Hour Format"
+    },
+    "showSeconds": {
+      "type": "boolean",
+      "default": false,
+      "label": "Show Seconds"
+    }
+  },
+  "icon": "🕐",
+  "tags": ["time", "format", "ui"]
+}
