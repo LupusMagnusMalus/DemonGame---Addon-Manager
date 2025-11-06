@@ -1,209 +1,447 @@
-// Zentrales Settings Management
-(function() {
-  'use strict';
+/**
+ * Storage Manager - Chrome Extension Storage Wrapper
+ * Provides a clean API for storage operations with module-specific functionality
+ */
 
-  class StorageManager {
-    static STORAGE_KEY = 'game-enhancement-config';
-    static DEFAULT_CONFIG = {
-      base: {
-        enabled: true,
-        sidebar: true,
-        wave_mods: true,
-        battle_mods: true,
-        inventory_mods: true,
-        stats_mods: true,
-        pvp_mods: true,
-        pets_mods: true,
-        event_mods: true,
-        monster_filters: true,
-        loot_collection: true,
-        gate_collapse: true
-      },
-      lupus: {
-        enabled: false,
-        enhancedSidebar: false,
-        submenus: false,
-        rankDetection: false,
-        timeFormat24h: false,
-        levelGateSwitch: false
-      },
-      asura: {
-        enabled: false,
-        advancedSidebar: false,
-        advancedSettings: false,
-        quickAccess: false,
-        advancedFilters: false,
-        statAllocation: false,
-        waveAutoRefresh: false,
-        battlePrediction: false,
-        customBackgrounds: false,
-        petNaming: false,
-        lootHighlighting: false,
-        menuCustomization: false,
-        debugTools: false
-      },
-      theme: {
-        sidebarColor: 'dark-blue',
-        backgroundColor: 'black'
-      },
-      advanced: {
-        pinnedItemsLimit: 3,
-        refreshInterval: 60,
-        debugMode: false
+class StorageManager {
+  constructor() {
+    this.cache = new Map();
+    this.listeners = new Map();
+    this.initializeListeners();
+  }
+
+  /**
+   * Initialize storage change listeners
+   */
+  initializeListeners() {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'local') {
+        this.handleStorageChange(changes);
       }
-    };
+    });
+  }
 
-    static async getConfiguration() {
-      try {
-        const result = await chrome.storage.local.get(this.STORAGE_KEY);
-        const saved = result[this.STORAGE_KEY];
-        
-        if (saved) {
-          // Merge mit Default-Config für neue Features
-          return this.mergeConfigs(this.DEFAULT_CONFIG, saved);
-        } else {
-          // Erste Nutzung - speichere Default-Config
-          await this.saveConfiguration(this.DEFAULT_CONFIG);
-          return this.DEFAULT_CONFIG;
-        }
-      } catch (error) {
-        console.error('Error loading configuration:', error);
-        return this.DEFAULT_CONFIG;
+  /**
+   * Handle storage changes and notify listeners
+   */
+  handleStorageChange(changes) {
+    for (const [key, change] of Object.entries(changes)) {
+      // Update cache
+      if (change.newValue !== undefined) {
+        this.cache.set(key, change.newValue);
+      } else {
+        this.cache.delete(key);
       }
-    }
-
-    static async saveConfiguration(config) {
-      try {
-        await chrome.storage.local.set({ [this.STORAGE_KEY]: config });
-        return true;
-      } catch (error) {
-        console.error('Error saving configuration:', error);
-        return false;
-      }
-    }
-
-    static async updateFeature(category, feature, enabled) {
-      const config = await this.getConfiguration();
-      if (config[category]) {
-        config[category][feature] = enabled;
-        return await this.saveConfiguration(config);
-      }
-      return false;
-    }
-
-    static async updateTheme(sidebarColor, backgroundColor) {
-      const config = await this.getConfiguration();
-      config.theme = {
-        sidebarColor: sidebarColor || config.theme.sidebarColor,
-        backgroundColor: backgroundColor || config.theme.backgroundColor
-      };
-      return await this.saveConfiguration(config);
-    }
-
-    static async resetToDefaults() {
-      return await this.saveConfiguration(this.DEFAULT_CONFIG);
-    }
-
-    static async clearAllData() {
-      try {
-        await chrome.storage.local.remove(this.STORAGE_KEY);
-        return true;
-      } catch (error) {
-        console.error('Error clearing data:', error);
-        return false;
-      }
-    }
-
-    static mergeConfigs(defaultConfig, savedConfig) {
-      const merged = JSON.parse(JSON.stringify(defaultConfig));
       
-      for (const [category, features] of Object.entries(savedConfig)) {
-        if (merged[category]) {
-          for (const [feature, value] of Object.entries(features)) {
-            if (merged[category].hasOwnProperty(feature)) {
-              merged[category][feature] = value;
-            }
+      // Notify listeners
+      const listeners = this.listeners.get(key);
+      if (listeners) {
+        listeners.forEach(callback => {
+          try {
+            callback(change.newValue, change.oldValue, key);
+          } catch (error) {
+            console.error('Storage listener error:', error);
           }
-        }
+        });
       }
-      
-      return merged;
-    }
-
-    // Legacy storage migration
-    static async migrateLegacySettings() {
-      try {
-        // Migration von Asura's settings
-        const asuraSettings = localStorage.getItem('demonGameExtensionSettings');
-        const lupusSettings = this.getLegacyCookieSettings();
-        
-        if (asuraSettings || lupusSettings) {
-          const config = await this.getConfiguration();
-          
-          if (asuraSettings) {
-            const parsed = JSON.parse(asuraSettings);
-            config.theme.sidebarColor = this.mapLegacyColor(parsed.sidebarColor);
-            config.theme.backgroundColor = this.mapLegacyColor(parsed.backgroundColor);
-            config.asura.enabled = true;
-            config.asura.advancedSidebar = true;
-          }
-          
-          if (lupusSettings) {
-            config.lupus.enabled = true;
-            config.lupus.submenus = lupusSettings.submenus;
-            config.lupus.timeFormat24h = lupusSettings.timeFormat24h;
-          }
-          
-          await this.saveConfiguration(config);
-          
-          // Cleanup legacy storage
-          localStorage.removeItem('demonGameExtensionSettings');
-          this.clearLegacyCookies();
-        }
-      } catch (error) {
-        console.warn('Legacy migration failed:', error);
-      }
-    }
-
-    static getLegacyCookieSettings() {
-      const cookies = document.cookie.split(';');
-      const settings = {};
-      
-      cookies.forEach(cookie => {
-        const [name, value] = cookie.trim().split('=');
-        if (name.startsWith('submenu_')) {
-          settings.submenus = true;
-        }
-        if (name === 'timeFormat24h') {
-          settings.timeFormat24h = value === 'true';
-        }
-      });
-      
-      return Object.keys(settings).length > 0 ? settings : null;
-    }
-
-    static mapLegacyColor(hexColor) {
-      const ColorPalette = window.GameEnhancement?.ColorPalette;
-      if (!ColorPalette) return 'dark-blue';
-      
-      const sidebarColor = ColorPalette.SIDEBAR_COLORS.find(c => c.value === hexColor);
-      const backgroundColor = ColorPalette.BACKGROUND_COLORS.find(c => c.value === hexColor);
-      
-      return sidebarColor?.id || backgroundColor?.id || 'dark-blue';
-    }
-
-    static clearLegacyCookies() {
-      const cookies = document.cookie.split(';');
-      cookies.forEach(cookie => {
-        const name = cookie.trim().split('=')[0];
-        if (name.startsWith('submenu_') || name === 'timeFormat24h') {
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        }
-      });
     }
   }
 
-  // Global verfügbar machen
+  /**
+   * Get value(s) from storage
+   */
+  async get(keys = null) {
+    try {
+      const result = await chrome.storage.local.get(keys);
+      
+      // Update cache
+      if (keys === null) {
+        // Getting all storage
+        this.cache.clear();
+        for (const [key, value] of Object.entries(result)) {
+          this.cache.set(key, value);
+        }
+      } else if (typeof keys === 'string') {
+        // Single key
+        if (result[keys] !== undefined) {
+          this.cache.set(keys, result[keys]);
+        }
+      } else if (Array.isArray(keys)) {
+        // Array of keys
+        for (const key of keys) {
+          if (result[key] !== undefined) {
+            this.cache.set(key, result[key]);
+          }
+        }
+      } else if (typeof keys === 'object') {
+        // Object with defaults
+        for (const [key, defaultValue] of Object.entries(keys)) {
+          const value = result[key] !== undefined ? result[key] : defaultValue;
+          this.cache.set(key, value);
+          if (result[key] === undefined) {
+            result[key] = defaultValue;
+          }
+        }
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Storage get error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set value(s) in storage
+   */
+  async set(items) {
+    try {
+      await chrome.storage.local.set(items);
+      
+      // Update cache
+      for (const [key, value] of Object.entries(items)) {
+        this.cache.set(key, value);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Storage set error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove key(s) from storage
+   */
+  async remove(keys) {
+    try {
+      await chrome.storage.local.remove(keys);
+      
+      // Update cache
+      const keyArray = Array.isArray(keys) ? keys : [keys];
+      for (const key of keyArray) {
+        this.cache.delete(key);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Storage remove error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear all storage
+   */
+  async clear() {
+    try {
+      await chrome.storage.local.clear();
+      this.cache.clear();
+      return true;
+    } catch (error) {
+      console.error('Storage clear error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cached value (synchronous)
+   */
+  getCached(key) {
+    return this.cache.get(key);
+  }
+
+  /**
+   * Check if key exists in cache
+   */
+  hasCached(key) {
+    return this.cache.has(key);
+  }
+
+  /**
+   * Get module-specific configuration
+   */
+  async getModuleConfig(moduleId, defaults = {}) {
+    try {
+      const { moduleSettings = {} } = await this.get('moduleSettings');
+      const config = moduleSettings[moduleId] || {};
+      return { ...defaults, ...config };
+    } catch (error) {
+      console.error(`Failed to get config for module ${moduleId}:`, error);
+      return defaults;
+    }
+  }
+
+  /**
+   * Set module-specific configuration
+   */
+  async setModuleConfig(moduleId, config) {
+    try {
+      const { moduleSettings = {} } = await this.get('moduleSettings');
+      moduleSettings[moduleId] = { ...moduleSettings[moduleId], ...config };
+      await this.set({ moduleSettings });
+      return true;
+    } catch (error) {
+      console.error(`Failed to set config for module ${moduleId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Update module setting
+   */
+  async updateModuleSetting(moduleId, settingKey, value) {
+    try {
+      const config = await this.getModuleConfig(moduleId);
+      config[settingKey] = value;
+      return await this.setModuleConfig(moduleId, config);
+    } catch (error) {
+      console.error(`Failed to update setting ${settingKey} for module ${moduleId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Get global settings
+   */
+  async getGlobalSettings(defaults = {}) {
+    try {
+      const { globalSettings = {} } = await this.get('globalSettings');
+      return { ...defaults, ...globalSettings };
+    } catch (error) {
+      console.error('Failed to get global settings:', error);
+      return defaults;
+    }
+  }
+
+  /**
+   * Set global settings
+   */
+  async setGlobalSettings(settings) {
+    try {
+      const { globalSettings = {} } = await this.get('globalSettings');
+      const updated = { ...globalSettings, ...settings };
+      await this.set({ globalSettings: updated });
+      return true;
+    } catch (error) {
+      console.error('Failed to set global settings:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get module registry
+   */
+  async getModuleRegistry() {
+    try {
+      const { modules = {} } = await this.get('modules');
+      return modules;
+    } catch (error) {
+      console.error('Failed to get module registry:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Set module registry
+   */
+  async setModuleRegistry(modules) {
+    try {
+      await this.set({ modules });
+      return true;
+    } catch (error) {
+      console.error('Failed to set module registry:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update module in registry
+   */
+  async updateModule(moduleId, moduleData) {
+    try {
+      const modules = await this.getModuleRegistry();
+      modules[moduleId] = { ...modules[moduleId], ...moduleData };
+      return await this.setModuleRegistry(modules);
+    } catch (error) {
+      console.error(`Failed to update module ${moduleId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Toggle module enabled state
+   */
+  async toggleModule(moduleId, enabled = null) {
+    try {
+      const modules = await this.getModuleRegistry();
+      const module = modules[moduleId];
+      
+      if (!module) {
+        throw new Error(`Module ${moduleId} not found in registry`);
+      }
+      
+      const newState = enabled !== null ? enabled : !module.enabled;
+      module.enabled = newState;
+      module.status = newState ? 'active' : 'disabled';
+      
+      await this.setModuleRegistry(modules);
+      return newState;
+    } catch (error) {
+      console.error(`Failed to toggle module ${moduleId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Get theme settings
+   */
+  async getTheme() {
+    try {
+      const { theme = 'dark' } = await this.get('theme');
+      return theme;
+    } catch (error) {
+      console.error('Failed to get theme:', error);
+      return 'dark';
+    }
+  }
+
+  /**
+   * Set theme
+   */
+  async setTheme(theme) {
+    try {
+      await this.set({ theme });
+      return true;
+    } catch (error) {
+      console.error('Failed to set theme:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Listen to storage changes for specific key
+   */
+  addListener(key, callback) {
+    if (!this.listeners.has(key)) {
+      this.listeners.set(key, new Set());
+    }
+    this.listeners.get(key).add(callback);
+  }
+
+  /**
+   * Remove storage change listener
+   */
+  removeListener(key, callback) {
+    const listeners = this.listeners.get(key);
+    if (listeners) {
+      listeners.delete(callback);
+      if (listeners.size === 0) {
+        this.listeners.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Get storage usage info
+   */
+  async getStorageInfo() {
+    try {
+      const data = await this.get();
+      const dataSize = JSON.stringify(data).length;
+      
+      return {
+        bytesInUse: dataSize,
+        quota: chrome.storage.local.QUOTA_BYTES,
+        percentUsed: (dataSize / chrome.storage.local.QUOTA_BYTES) * 100,
+        keys: Object.keys(data).length,
+        cacheSize: this.cache.size
+      };
+    } catch (error) {
+      console.error('Failed to get storage info:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Export all data for backup
+   */
+  async exportData() {
+    try {
+      const data = await this.get();
+      return {
+        version: '0.1.0',
+        timestamp: Date.now(),
+        data
+      };
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Import data from backup
+   */
+  async importData(exportedData) {
+    try {
+      if (!exportedData || !exportedData.data) {
+        throw new Error('Invalid export data format');
+      }
+      
+      await this.clear();
+      await this.set(exportedData.data);
+      
+      console.log('Data imported successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Reset to defaults
+   */
+  async reset() {
+    try {
+      await this.clear();
+      
+      // Set default values
+      const defaults = {
+        version: '0.1.0',
+        theme: 'dark',
+        globalSettings: {
+          performance: {
+            maxActiveModules: 20,
+            lazyLoading: true,
+            debugMode: false
+          },
+          ui: {
+            showNotifications: true,
+            animationsEnabled: true,
+            compactMode: false
+          }
+        },
+        modules: {},
+        moduleSettings: {},
+        lastModuleScan: null
+      };
+      
+      await this.set(defaults);
+      console.log('Storage reset to defaults');
+      return true;
+    } catch (error) {
+      console.error('Failed to reset storage:', error);
+      return false;
+    }
+  }
+}
+
+// Export for use in other modules
+if (typeof window !== 'undefined') {
   window.GameEnhancement = window.GameEnhancement || {};
   window.GameEnhancement.StorageManager = StorageManager;
-})();
+}
+
+console.log('💾 Storage Manager Loaded');

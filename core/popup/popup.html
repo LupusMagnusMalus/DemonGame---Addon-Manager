@@ -3,56 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lupus Addon Manager</title>
+  <title>DemonGame Addon Manager</title>
   <link rel="stylesheet" href="popup.css">
-  <link rel="stylesheet" href="components/color-picker.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="components/toggle-switch.css">
 </head>
 <body>
-  <!-- Header -->
-  <header class="popup-header">
-    <div class="header-title">
-      <div class="extension-icon"><img src="../favicon.png" alt="🐺" loading="lazy" height="50" width="50"></div>
-      
-      <div>
-        <h1>Addon Manager</h1>
-        <span class="header-subtitle">Control Center</span>
-        <span class="header-subtitle">By Lupus</span>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="header-info">
+        <h1 class="title">
+          <span class="icon">🎯</span>
+          DemonGame Manager
+        </h1>
+        <div class="version">v0.1.0</div>
+      </div>
+      <div class="header-actions">
+        <button id="scanModulesBtn" class="btn btn-primary" title="Scan for modules">
+          <span class="icon">🔍</span>
+          Scan
+        </button>
+      </div>
+    </header>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+      <div class="status-item">
+        <span class="label">Modules:</span>
+        <span class="value" id="moduleCount">-</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Active:</span>
+        <span class="value" id="activeCount">-</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Last Scan:</span>
+        <span class="value" id="lastScan">Never</span>
       </div>
     </div>
-    <span class="header-version" id="headerVersion">v0.0.0</span>
-  </header>
 
-  <!-- Tab Navigation (populated dynamically) -->
-  <nav class="tab-navigation" id="tabNavigation">
-    <!-- Tabs inserted by JS -->
-  </nav>
-
-  <!-- Tab Content Container -->
-  <main id="tabContent">
-    <div class="loading-overlay">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Initializing...</div>
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+      <div class="spinner"></div>
+      <span class="loading-text">Scanning modules...</span>
     </div>
-  </main>
 
-  <!-- Footer -->
-  <footer class="popup-footer">
-    <div class="footer-status">
-      <span class="status-indicator"></span>
-      <span>Loading...</span> <!-- Dieser span wird aktualisiert -->
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="modules">
+        <span class="icon">📦</span>
+        Modules
+      </button>
+      <button class="tab-btn" data-tab="theme">
+        <span class="icon">🎨</span>
+        Theme
+      </button>
+      <button class="tab-btn" data-tab="about">
+        <span class="icon">ℹ️</span>
+        About
+      </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Modules Tab -->
+      <div class="tab-pane active" id="modulesTab">
+        <!-- Module Categories -->
+        <div class="category-filters">
+          <button class="category-btn active" data-category="all">All</button>
+          <button class="category-btn" data-category="base">Base</button>
+          <button class="category-btn" data-category="community">Community</button>
+          <button class="category-btn" data-category="experimental">Experimental</button>
+        </div>
+
+        <!-- Module List -->
+        <div class="module-list" id="moduleList">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📭</div>
+            <h3>No modules found</h3>
+            <p>Click "Scan" to discover available modules</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Tab -->
+      <div class="tab-pane" id="themeTab">
+        <!-- Will be loaded from tabs/theme.html -->
+        <div class="loading-placeholder">Loading theme settings...</div>
+      </div>
+
+      <!-- About Tab -->
+      <div class="tab-pane" id="aboutTab">
+        <!-- Will be loaded from tabs/about.html -->
+        <div class="loading-placeholder">Loading about information...</div>
+      </div>
     </div>
-    <div class="footer-actions">
-      <button class="footer-button" id="refreshStatus" title="Refresh Status">🔄</button>
-      <button class="footer-button" id="openHelp" title="Help">❓</button>
+
+    <!-- Quick Actions Footer -->
+    <footer class="popup-footer">
+      <div class="quick-actions">
+        <button id="safeMode" class="btn btn-warning" title="Enter Safe Mode">
+          <span class="icon">🛡️</span>
+          Safe Mode
+        </button>
+        <button id="reloadAll" class="btn btn-secondary" title="Reload all active modules">
+          <span class="icon">🔄</span>
+          Reload All
+        </button>
+        <button id="settingsBtn" class="btn btn-secondary" title="Global Settings">
+          <span class="icon">⚙️</span>
+          Settings
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Module Item Template -->
+  <template id="moduleItemTemplate">
+    <div class="module-item" data-module-id="">
+      <div class="module-header">
+        <div class="module-info">
+          <div class="module-icon">📦</div>
+          <div class="module-details">
+            <h3 class="module-name"></h3>
+            <p class="module-description"></p>
+            <div class="module-meta">
+              <span class="module-version"></span>
+              <span class="module-category"></span>
+              <span class="module-author"></span>
+            </div>
+          </div>
+        </div>
+        <div class="module-actions">
+          <div class="module-status">
+            <div class="status-indicator"></div>
+            <span class="status-text"></span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" class="module-toggle" />
+            <label class="toggle-label"></label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="module-body" style="display: none;">
+        <div class="module-tags"></div>
+        <div class="module-settings"></div>
+        <div class="module-actions-extended">
+          <button class="btn btn-sm btn-secondary module-settings-btn">
+            <span class="icon">⚙️</span>
+            Settings
+          </button>
+          <button class="btn btn-sm btn-secondary module-reload-btn">
+            <span class="icon">🔄</span>
+            Reload
+          </button>
+          <button class="btn btn-sm btn-danger module-unload-btn">
+            <span class="icon">❌</span>
+            Unload
+          </button>
+        </div>
+      </div>
     </div>
-  </footer>
+  </template>
 
-  <!-- Toast Container -->
-  <div class="toast-container"></div>
+  <!-- Notification Template -->
+  <template id="notificationTemplate">
+    <div class="notification">
+      <div class="notification-icon"></div>
+      <div class="notification-content">
+        <div class="notification-title"></div>
+        <div class="notification-message"></div>
+      </div>
+      <button class="notification-close">×</button>
+    </div>
+  </template>
 
-  <!-- Scripts - Lade ColorPalette zuerst! -->
-  <script src="../../core/color-palette.js"></script>
-  <script src="tab-loader.js"></script>
-  <script src="popup.js"></script>
+  <!-- Modal Template -->
+  <template id="modalTemplate">
+    <div class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title"></h3>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-cancel">Cancel</button>
+          <button class="btn btn-primary modal-confirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts -->
+  <script src="popup.js" type="module"></script>
 </body>
 </html>

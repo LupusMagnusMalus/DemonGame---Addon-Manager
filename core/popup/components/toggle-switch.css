@@ -1,0 +1,232 @@
+/* Toggle Switch Component */
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-tertiary, #475569);
+  border: 1px solid var(--border-color, #64748b);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.toggle-label:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  top: 2px;
+  background-color: var(--text-primary, #f8fafc);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Checked state */
+.toggle-switch input:checked + .toggle-label {
+  background-color: var(--primary-color, #6366f1);
+  border-color: var(--primary-color, #6366f1);
+}
+
+.toggle-switch input:checked + .toggle-label:before {
+  transform: translateX(20px);
+  background-color: white;
+}
+
+/* Focus state */
+.toggle-switch input:focus + .toggle-label {
+  box-shadow: 0 0 0 2px var(--primary-color, #6366f1), 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Hover state */
+.toggle-switch:hover .toggle-label {
+  border-color: var(--border-light, #cbd5e1);
+}
+
+.toggle-switch:hover input:checked + .toggle-label {
+  background-color: var(--primary-hover, #5855eb);
+  border-color: var(--primary-hover, #5855eb);
+}
+
+/* Disabled state */
+.toggle-switch input:disabled + .toggle-label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle-switch input:disabled + .toggle-label:before {
+  background-color: var(--text-muted, #94a3b8);
+}
+
+/* Loading state */
+.toggle-switch.loading .toggle-label {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.toggle-switch.loading .toggle-label:before {
+  animation: togglePulse 1s infinite;
+}
+
+@keyframes togglePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Size variants */
+.toggle-switch.toggle-sm {
+  width: 32px;
+  height: 18px;
+}
+
+.toggle-switch.toggle-sm .toggle-label {
+  border-radius: 9px;
+}
+
+.toggle-switch.toggle-sm .toggle-label:before {
+  height: 14px;
+  width: 14px;
+  left: 1px;
+  top: 1px;
+}
+
+.toggle-switch.toggle-sm input:checked + .toggle-label:before {
+  transform: translateX(14px);
+}
+
+.toggle-switch.toggle-lg {
+  width: 56px;
+  height: 30px;
+}
+
+.toggle-switch.toggle-lg .toggle-label {
+  border-radius: 15px;
+}
+
+.toggle-switch.toggle-lg .toggle-label:before {
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  top: 2px;
+}
+
+.toggle-switch.toggle-lg input:checked + .toggle-label:before {
+  transform: translateX(26px);
+}
+
+/* Color variants */
+.toggle-switch.toggle-success input:checked + .toggle-label {
+  background-color: var(--success-color, #10b981);
+  border-color: var(--success-color, #10b981);
+}
+
+.toggle-switch.toggle-warning input:checked + .toggle-label {
+  background-color: var(--warning-color, #f59e0b);
+  border-color: var(--warning-color, #f59e0b);
+}
+
+.toggle-switch.toggle-danger input:checked + .toggle-label {
+  background-color: var(--danger-color, #ef4444);
+  border-color: var(--danger-color, #ef4444);
+}
+
+/* With labels */
+.toggle-switch-with-labels {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-switch-label {
+  font-size: 12px;
+  color: var(--text-secondary, #cbd5e1);
+  user-select: none;
+}
+
+.toggle-switch-label.active {
+  color: var(--text-primary, #f8fafc);
+  font-weight: 500;
+}
+
+/* Group layout */
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toggle-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #334155);
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #475569);
+}
+
+.toggle-group-item:hover {
+  background: var(--bg-tertiary, #475569);
+}
+
+.toggle-group-label {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary, #f8fafc);
+}
+
+.toggle-group-description {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 2px;
+}
+
+/* Accessibility */
+.toggle-switch input:focus + .toggle-label {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-label,
+  .toggle-label:before {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .toggle-label {
+    border-width: 2px;
+  }
+  
+  .toggle-switch input:checked + .toggle-label {
+    background-color: ButtonText;
+  }
+  
+  .toggle-switch input:checked + .toggle-label:before {
+    background-color: ButtonFace;
+  }
+}
