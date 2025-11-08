@@ -1,44 +1,127 @@
-// Tab Loader - CSP-compliant Dynamic Tab Loading
+// Tab Loader - Fully Dynamic Tab Discovery System
 class TabLoader {
   constructor() {
     this.tabs = [];
     this.loadedTabs = new Map();
     this.loadedScripts = new Set();
     this.baseTabPath = './tabs/';
+    this.tabsBasePath = 'core/popup/tabs/';
   }
 
+  /**
+   * Auto-discover all available tabs by scanning for HTML files
+   */
   async discoverTabs() {
-    console.log('🔍 Discovering tabs...');
+    console.log('🔍 Auto-discovering tabs...');
     
-    const tabIds = ['about', 'settings', 'notifications', 'theme', 'asura'];
+    const discoveredTabs = [];
     
-    for (const tabId of tabIds) {
+    // Method 1: Try to scan known tab possibilities
+    const potentialTabs = [
+      'modules', 'theme', 'about', 'settings', 
+      'notifications', 'help', 'debug', 'logs'
+    ];
+    
+    for (const tabId of potentialTabs) {
       try {
-        const metadataPath = `${this.baseTabPath}${tabId}.json`;
-        console.log(`📋 Loading metadata for ${tabId} from ${metadataPath}`);
+        // Check if HTML file exists
+        const htmlExists = await this.checkFileExists(`${this.tabsBasePath}${tabId}.html`);
         
-        const response = await fetch(metadataPath);
-        if (!response.ok) {
-          console.warn(`⚠️ Could not load ${tabId}.json:`, response.status);
-          continue;
+        if (htmlExists) {
+          // Try to load metadata
+          const metadata = await this.loadTabMetadata(tabId);
+          discoveredTabs.push({
+            id: tabId,
+            ...metadata
+          });
+          console.log(`✅ Tab discovered: ${tabId}`);
         }
-        
-        const metadata = await response.json();
-        this.tabs.push({
-          id: tabId,
-          ...metadata
-        });
-        
-        console.log(`✅ Tab registered: ${tabId}`);
       } catch (error) {
-        console.warn(`⚠️ Failed to load tab ${tabId}:`, error);
+        // Tab doesn't exist or failed to load, skip silently
+        console.log(`⏭️ Tab ${tabId} not available`);
       }
     }
     
-    console.log(`✅ Discovered ${this.tabs.length} tabs:`, this.tabs.map(t => t.id));
+    // Sort tabs by order field
+    discoveredTabs.sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 999;
+      const orderB = b.order !== undefined ? b.order : 999;
+      return orderA - orderB;
+    });
+    
+    this.tabs = discoveredTabs;
+    console.log(`✅ Discovered ${this.tabs.length} tabs:`, this.tabs.map(t => `${t.name}(${t.order})`));
+    
     return this.tabs;
   }
 
+  /**
+   * Check if a file exists by attempting to fetch it
+   */
+  async checkFileExists(path) {
+    try {
+      const response = await fetch(chrome.runtime.getURL(path));
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Load tab metadata with fallbacks
+   */
+  async loadTabMetadata(tabId) {
+    // Default metadata
+    const fallbackMetadata = {
+      name: this.capitalizeFirst(tabId),
+      icon: this.getDefaultIcon(tabId),
+      order: 999,
+      description: `${this.capitalizeFirst(tabId)} tab`
+    };
+    
+    try {
+      // Try to load from JSON file
+      const metadataPath = `${this.tabsBasePath}${tabId}.json`;
+      const response = await fetch(chrome.runtime.getURL(metadataPath));
+      
+      if (response.ok) {
+        const metadata = await response.json();
+        return { ...fallbackMetadata, ...metadata };
+      }
+    } catch (error) {
+      console.log(`ℹ️ No metadata for ${tabId}, using fallback`);
+    }
+    
+    return fallbackMetadata;
+  }
+
+  /**
+   * Get default icon for tab based on name
+   */
+  getDefaultIcon(tabId) {
+    const iconMap = {
+      modules: '📦',
+      theme: '🎨', 
+      about: 'ℹ️',
+      settings: '⚙️',
+      notifications: '🔔',
+      help: '❓',
+      debug: '🐛',
+      logs: '📝'
+    };
+    return iconMap[tabId] || '📄';
+  }
+
+  /**
+   * Capitalize first letter
+   */
+  capitalizeFirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  /**
+   * Load tab content
+   */
   async loadTab(tabId) {
     console.log(`📂 Loading tab: ${tabId}`);
     
@@ -49,19 +132,19 @@ class TabLoader {
     
     try {
       // Load HTML
-      const htmlPath = `${this.baseTabPath}${tabId}.html`;
-      console.log(`📄 Loading HTML from: ${htmlPath}`);
+      const htmlPath = `${this.tabsBasePath}${tabId}.html`;
+      const response = await fetch(chrome.runtime.getURL(htmlPath));
       
-      const htmlResponse = await fetch(htmlPath);
-      if (!htmlResponse.ok) {
-        throw new Error(`Failed to load ${htmlPath}: ${htmlResponse.status}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${htmlPath}: ${response.status}`);
       }
-      const html = await htmlResponse.text();
       
-      // Load CSS
+      const html = await response.text();
+      
+      // Load CSS (optional)
       await this.loadCSS(tabId);
       
-      // Load JS (CSP-compliant)
+      // Load JS (optional)
       await this.loadJS(tabId);
       
       // Cache the HTML
@@ -76,14 +159,16 @@ class TabLoader {
     }
   }
 
+  /**
+   * Load CSS file for tab
+   */
   async loadCSS(tabId) {
-    const cssPath = `${this.baseTabPath}${tabId}.css`;
-    console.log(`🎨 Loading CSS from: ${cssPath}`);
-    
     try {
-      const cssResponse = await fetch(cssPath);
-      if (cssResponse.ok) {
-        const css = await cssResponse.text();
+      const cssPath = `${this.tabsBasePath}${tabId}.css`;
+      const response = await fetch(chrome.runtime.getURL(cssPath));
+      
+      if (response.ok) {
+        const css = await response.text();
         
         let styleSheet = document.getElementById(`tab-style-${tabId}`);
         if (!styleSheet) {
@@ -93,59 +178,53 @@ class TabLoader {
           document.head.appendChild(styleSheet);
           console.log(`✅ CSS loaded for ${tabId}`);
         }
-      } else {
-        console.warn(`⚠️ No CSS file for ${tabId}`);
       }
     } catch (error) {
-      console.warn(`⚠️ CSS loading error for ${tabId}:`, error);
+      console.log(`ℹ️ No CSS for ${tabId}`);
     }
   }
 
+  /**
+   * Load JavaScript file for tab
+   */
   async loadJS(tabId) {
-    const jsPath = `${this.baseTabPath}${tabId}.js`;
-    
-    // Skip if already loaded
     if (this.loadedScripts.has(tabId)) {
       console.log(`♻️ JS already loaded for ${tabId}`);
       return;
     }
     
-    console.log(`⚙️ Loading JS from: ${jsPath}`);
-    
     try {
-      const jsResponse = await fetch(jsPath);
-      if (jsResponse.ok) {
-        // Create script element with src attribute (CSP-compliant)
+      const jsPath = `${this.tabsBasePath}${tabId}.js`;
+      const response = await fetch(chrome.runtime.getURL(jsPath));
+      
+      if (response.ok) {
         const script = document.createElement('script');
         script.id = `tab-script-${tabId}`;
-        script.src = jsPath;
+        script.src = chrome.runtime.getURL(jsPath);
         script.type = 'text/javascript';
         
-        // Wait for script to load
         await new Promise((resolve, reject) => {
           script.onload = () => {
             console.log(`✅ JS loaded for ${tabId}`);
             this.loadedScripts.add(tabId);
             resolve();
           };
-          script.onerror = (error) => {
-            console.error(`❌ JS loading error for ${tabId}:`, error);
-            reject(error);
-          };
-          
+          script.onerror = reject;
           document.body.appendChild(script);
         });
-      } else {
-        console.warn(`⚠️ No JS file for ${tabId}`);
       }
     } catch (error) {
-      console.warn(`⚠️ JS loading error for ${tabId}:`, error);
+      console.log(`ℹ️ No JS for ${tabId}`);
     }
   }
 
+  /**
+   * Unload tab and cleanup
+   */
   unloadTab(tabId) {
+    // Execute cleanup function if available
     const cleanupFn = window[`cleanup_${tabId}`];
-    if (cleanupFn && typeof cleanupFn === 'function') {
+    if (typeof cleanupFn === 'function') {
       try {
         cleanupFn();
         console.log(`🧹 Cleanup executed for ${tabId}`);
@@ -153,6 +232,35 @@ class TabLoader {
         console.error(`❌ Cleanup error for ${tabId}:`, error);
       }
     }
+    
+    // Remove from tracking
+    this.loadedScripts.delete(tabId);
+    
+    // Remove CSS
+    const styleSheet = document.getElementById(`tab-style-${tabId}`);
+    if (styleSheet) {
+      styleSheet.remove();
+    }
+    
+    // Remove script (optional, as it's already executed)
+    const script = document.getElementById(`tab-script-${tabId}`);
+    if (script) {
+      script.remove();
+    }
+  }
+
+  /**
+   * Get all discovered tabs metadata
+   */
+  getTabList() {
+    return this.tabs;
+  }
+
+  /**
+   * Get tab by ID
+   */
+  getTab(tabId) {
+    return this.tabs.find(tab => tab.id === tabId);
   }
 }
 

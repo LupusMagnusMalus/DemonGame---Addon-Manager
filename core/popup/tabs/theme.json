@@ -1,6 +1,6 @@
 {
   "name": "Theme",
   "icon": "🎨",
-  "order": 4,
-  "description": "Customize the appearance of the application"
+  "order": 2,
+  "description": "Color customization and themes"
 }
