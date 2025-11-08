@@ -1,0 +1,537 @@
+<!-- Modules Tab Content -->
+<div class="modules-content">
+  
+  <!-- Header Actions -->
+  <div class="modules-header">
+    <div class="modules-stats">
+      <div class="stat-item">
+        <span class="stat-value" id="moduleCount">0</span>
+        <span class="stat-label">Total Modules</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="activeCount">0</span>
+        <span class="stat-label">Active</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="lastScan">Never</span>
+        <span class="stat-label">Last Scan</span>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button id="scanModules" class="action-btn primary">
+        <span class="btn-icon">🔍</span>
+        Scan Modules
+      </button>
+      <button id="safeMode" class="action-btn warning">
+        <span class="btn-icon">🛡️</span>
+        Safe Mode
+      </button>
+    </div>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="category-filter">
+    <div class="filter-label">Categories:</div>
+    <div class="category-buttons">
+      <button class="category-btn active" data-category="all">
+        <span class="btn-icon">📦</span>
+        All
+      </button>
+      <button class="category-btn" data-category="base">
+        <span class="btn-icon">🎯</span>
+        Base
+      </button>
+      <button class="category-btn" data-category="community">
+        <span class="btn-icon">👥</span>
+        Community
+      </button>
+      <button class="category-btn" data-category="experimental">
+        <span class="btn-icon">🧪</span>
+        Experimental
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-container">
+      <input type="text" id="moduleSearch" placeholder="Search modules..." class="search-input">
+      <div class="search-icon">🔍</div>
+    </div>
+    <div class="search-filters">
+      <select id="sortBy" class="filter-select">
+        <option value="name">Sort by Name</option>
+        <option value="priority">Sort by Priority</option>
+        <option value="status">Sort by Status</option>
+        <option value="category">Sort by Category</option>
+      </select>
+      <select id="filterStatus" class="filter-select">
+        <option value="all">All Status</option>
+        <option value="active">Active Only</option>
+        <option value="disabled">Disabled Only</option>
+        <option value="error">Error Only</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Module List -->
+  <div class="modules-list-container">
+    <div id="moduleList" class="modules-list">
+      <!-- Modules will be dynamically populated here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">No Modules Found</div>
+      <div class="empty-description">
+        No modules match your current filters. Try adjusting your search or scan for new modules.
+      </div>
+      <button id="emptyScanModules" class="action-btn primary">
+        <span class="btn-icon">🔍</span>
+        Scan for Modules
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading modules...</div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions" style="display: none;">
+    <div class="bulk-info">
+      <span id="selectedCount">0</span> modules selected
+    </div>
+    <div class="bulk-buttons">
+      <button id="enableSelected" class="bulk-btn success">
+        <span class="btn-icon">✅</span>
+        Enable Selected
+      </button>
+      <button id="disableSelected" class="bulk-btn secondary">
+        <span class="btn-icon">❌</span>
+        Disable Selected
+      </button>
+      <button id="reloadSelected" class="bulk-btn info">
+        <span class="btn-icon">🔄</span>
+        Reload Selected
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Actions Bar -->
+  <div class="quick-actions">
+    <button id="enableAll" class="quick-btn success" title="Enable All Modules">
+      <span class="btn-icon">✅</span>
+      Enable All
+    </button>
+    <button id="disableAll" class="quick-btn secondary" title="Disable All Modules">
+      <span class="btn-icon">❌</span>
+      Disable All
+    </button>
+    <button id="reloadAll" class="quick-btn info" title="Reload All Active Modules">
+      <span class="btn-icon">🔄</span>
+      Reload All
+    </button>
+    <button id="exportModuleConfig" class="quick-btn info" title="Export Module Configuration">
+      <span class="btn-icon">📤</span>
+      Export Config
+    </button>
+  </div>
+</div>
+
+<style>
+.modules-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.modules-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #313244;
+  border-radius: 8px;
+  border: 1px solid #45475a;
+}
+
+.modules-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f9e2af;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #6c7086;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.action-btn.primary {
+  background: #6366f1;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #5855eb;
+}
+
+.action-btn.warning {
+  background: #f59e0b;
+  color: #1e1e2e;
+}
+
+.action-btn.warning:hover {
+  background: #d97706;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #45475a;
+}
+
+.filter-label {
+  color: #a6adc8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.category-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.category-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #45475a;
+  border-radius: 16px;
+  color: #a6adc8;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+  background: #45475a;
+  color: #cdd6f4;
+}
+
+.category-btn.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+.search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  color: #cdd6f4;
+  font-size: 13px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c7086;
+  font-size: 14px;
+}
+
+.search-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-select {
+  flex: 1;
+  padding: 6px 10px;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  color: #cdd6f4;
+  font-size: 12px;
+}
+
+.modules-list-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.modules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  color: #cdd6f4;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.empty-description {
+  color: #6c7086;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 280px;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #45475a;
+  border-top: 2px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #6c7086;
+  font-size: 13px;
+}
+
+.bulk-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid #6366f1;
+  border-radius: 6px;
+}
+
+.bulk-info {
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bulk-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.bulk-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bulk-btn.success {
+  background: #10b981;
+  color: white;
+}
+
+.bulk-btn.success:hover {
+  background: #059669;
+}
+
+.bulk-btn.secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.bulk-btn.secondary:hover {
+  background: #4b5563;
+}
+
+.bulk-btn.info {
+  background: #3b82f6;
+  color: white;
+}
+
+.bulk-btn.info:hover {
+  background: #2563eb;
+}
+
+.quick-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #45475a;
+}
+
+.quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  color: #a6adc8;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-btn:hover {
+  background: #45475a;
+}
+
+.quick-btn.success:hover {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.quick-btn.secondary:hover {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+.quick-btn.info:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.quick-btn .btn-icon {
+  font-size: 14px;
+}
+
+/* Scrollbar for modules list */
+.modules-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modules-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modules-list-container::-webkit-scrollbar-thumb {
+  background: #585b70;
+  border-radius: 3px;
+}
+
+.modules-list-container::-webkit-scrollbar-thumb:hover {
+  background: #6c7086;
+}
+
+.btn-icon {
+  font-size: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .modules-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .search-filters {
+    flex-direction: column;
+  }
+  
+  .quick-actions {
+    flex-wrap: wrap;
+  }
+  
+  .quick-btn {
+    min-width: calc(50% - 3px);
+  }
+}
+</style>

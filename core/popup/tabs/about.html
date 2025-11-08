@@ -1,0 +1,384 @@
+<!-- About Tab Content -->
+<div class="about-content">
+  <!-- Extension Information -->
+  <div class="about-section">
+    <div class="about-header">
+      <div class="about-icon">🎯</div>
+      <div class="about-info">
+        <h2>DemonGame Addon Manager</h2>
+        <p id="aboutVersion" class="version-info">Version 0.1.0</p>
+        <p class="description">A modular browser extension combining the best features from GonBruck, Lupus, and Asura addons for the Demonic Scans game.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Information -->
+  <div class="about-section">
+    <h3>System Information</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Extension ID:</label>
+        <span id="extensionId" class="info-value">Loading...</span>
+      </div>
+      <div class="info-item">
+        <label>Browser:</label>
+        <span id="browserInfo" class="info-value">Loading...</span>
+      </div>
+      <div class="info-item">
+        <label>Architecture:</label>
+        <span class="info-value">Modular System</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="about-section">
+    <h3>Quick Actions</h3>
+    <div class="action-buttons">
+      <button id="openGithub" class="action-btn primary">
+        <span class="btn-icon">📁</span>
+        View Repository
+      </button>
+      <button id="openIssues" class="action-btn secondary">
+        <span class="btn-icon">🐛</span>
+        Report Issue
+      </button>
+      <button id="openChangelog" class="action-btn secondary">
+        <span class="btn-icon">📝</span>
+        Changelog
+      </button>
+    </div>
+  </div>
+
+  <!-- Credits Section -->
+  <div class="about-section">
+    <h3>Credits & Acknowledgments</h3>
+    
+    <div class="credit-item">
+      <div class="credit-header">
+        <h4>Original Developers</h4>
+        <p>This extension combines and enhances features from these amazing projects:</p>
+      </div>
+      
+      <!-- GonBruck Credit -->
+      <div class="contributor">
+        <div class="contributor-info">
+          <div class="contributor-name">GonBruck</div>
+          <div class="contributor-role">Original DemonGame Extension</div>
+          <div class="contributor-desc">Battle enhancements, automation features, and core game improvements</div>
+        </div>
+        <div class="contributor-links">
+          <button id="openGithubGonBruck" class="link-btn">GitHub Profile</button>
+          <button id="openGithubGonBruckRepo" class="link-btn">Repository</button>
+        </div>
+      </div>
+
+      <!-- Asura Credit -->
+      <div class="contributor">
+        <div class="contributor-info">
+          <div class="contributor-name">Asura</div>
+          <div class="contributor-role">Advanced UI Addon</div>
+          <div class="contributor-desc">Professional-grade interface enhancements and advanced tools</div>
+        </div>
+        <div class="contributor-links">
+          <button id="openGithubAsura" class="link-btn">GitHub Profile</button>
+          <button id="openGithubAsuraRepo" class="link-btn">Repository</button>
+        </div>
+      </div>
+
+      <!-- Current Developer -->
+      <div class="contributor">
+        <div class="contributor-info">
+          <div class="contributor-name">LupusMagnus</div>
+          <div class="contributor-role">Modular System Architecture</div>
+          <div class="contributor-desc">Unified modular architecture combining all features into one extensible system</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Information -->
+  <div class="about-section">
+    <h3>Technical Details</h3>
+    <div class="tech-details">
+      <div class="tech-item">
+        <strong>Architecture:</strong> Modular Chrome Extension with ES6+ modules
+      </div>
+      <div class="tech-item">
+        <strong>Target:</strong> demonicscans.org gaming platform
+      </div>
+      <div class="tech-item">
+        <strong>Compatibility:</strong> Chrome/Chromium-based browsers (Manifest V3)
+      </div>
+      <div class="tech-item">
+        <strong>Module System:</strong> JSON5-based manifests with automatic UI generation
+      </div>
+    </div>
+  </div>
+
+  <!-- License Information -->
+  <div class="about-section">
+    <h3>License</h3>
+    <div class="license-info">
+      <p>This project is open source and available under the MIT License.</p>
+      <p>You are free to use, modify, and distribute this software as per the license terms.</p>
+    </div>
+  </div>
+
+  <!-- Support Information -->
+  <div class="about-section">
+    <h3>Support & Community</h3>
+    <div class="support-info">
+      <div class="support-item">
+        <strong>Feature Requests:</strong> Submit via GitHub Issues with the "enhancement" label
+      </div>
+      <div class="support-item">
+        <strong>Bug Reports:</strong> Please include browser version, error logs, and reproduction steps
+      </div>
+      <div class="support-item">
+        <strong>Development:</strong> Contributions welcome! Check the repository for development guidelines
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.about-content {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.about-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #45475a;
+}
+
+.about-section:last-child {
+  border-bottom: none;
+}
+
+.about-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.about-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.about-info h2 {
+  margin: 0 0 4px 0;
+  color: #f9e2af;
+  font-size: 20px;
+}
+
+.version-info {
+  color: #6c7086;
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.description {
+  color: #cdd6f4;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.about-section h3 {
+  color: #f9e2af;
+  font-size: 16px;
+  margin: 0 0 12px 0;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.info-item label {
+  color: #a6adc8;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #cdd6f4;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn.primary {
+  background: #6366f1;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #5855eb;
+}
+
+.action-btn.secondary {
+  background: #45475a;
+  color: #cdd6f4;
+}
+
+.action-btn.secondary:hover {
+  background: #585b70;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+.credit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.credit-header h4 {
+  color: #f9e2af;
+  margin: 0 0 4px 0;
+}
+
+.credit-header p {
+  color: #a6adc8;
+  margin: 0;
+  font-size: 14px;
+}
+
+.contributor {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background: #313244;
+  border-radius: 6px;
+  gap: 12px;
+}
+
+.contributor-info {
+  flex: 1;
+}
+
+.contributor-name {
+  color: #cdd6f4;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.contributor-role {
+  color: #6366f1;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.contributor-desc {
+  color: #a6adc8;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.contributor-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link-btn {
+  background: transparent;
+  border: 1px solid #6366f1;
+  color: #6366f1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.link-btn:hover {
+  background: #6366f1;
+  color: white;
+}
+
+.tech-details, .support-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tech-item, .support-item {
+  padding: 8px 12px;
+  background: #313244;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #cdd6f4;
+  line-height: 1.4;
+}
+
+.license-info {
+  padding: 12px;
+  background: #313244;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #a6adc8;
+  line-height: 1.4;
+}
+
+.license-info p {
+  margin: 0 0 8px 0;
+}
+
+.license-info p:last-child {
+  margin: 0;
+}
+
+/* Scrollbar Styling */
+.about-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.about-content::-webkit-scrollbar-track {
+  background: #313244;
+  border-radius: 3px;
+}
+
+.about-content::-webkit-scrollbar-thumb {
+  background: #585b70;
+  border-radius: 3px;
+}
+
+.about-content::-webkit-scrollbar-thumb:hover {
+  background: #6c7086;
+}
+</style>
