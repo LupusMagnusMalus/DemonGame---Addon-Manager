@@ -5,70 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DemonGame Addon Manager</title>
   <link rel="stylesheet" href="popup.css">
-  <link rel="stylesheet" href="../styles/base.css">
-  <link rel="stylesheet" href="components/toggle-switch.css">
 </head>
 <body>
   <div class="popup-container">
+    
     <!-- Header -->
     <header class="popup-header">
       <div class="header-info">
-        <h1 class="title">
-          <span class="icon">🎯</span>
-          DemonGame Manager
-        </h1>
-        <div class="version">v0.1.0</div>
-      </div>
-      <div class="header-actions">
-        <button id="scanModulesBtn" class="btn btn-primary" title="Scan for modules">
-          <span class="icon">🔍</span>
-          Scan
-        </button>
+        <h1>DemonGame Addon Manager</h1>
+        <span class="version-badge">v0.1.0</span>
       </div>
     </header>
 
-    <!-- Status Bar -->
-    <div class="status-bar" id="statusBar">
-      <div class="status-item">
-        <span class="label">Modules:</span>
-        <span class="value" id="moduleCount">-</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Active:</span>
-        <span class="value" id="activeCount">-</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Last Scan:</span>
-        <span class="value" id="lastScan">Never</span>
-      </div>
-    </div>
-
-    <!-- Loading Indicator -->
-    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-      <div class="spinner"></div>
-      <span class="loading-text">Scanning modules...</span>
-    </div>
-
-    <!-- Tab Navigation -->
-    <nav class="tab-navigation">
-      <button class="tab-btn active" data-tab="modules">
-        <span class="icon">📦</span>
-        Modules
-      </button>
-      <button class="tab-btn" data-tab="theme">
-        <span class="icon">🎨</span>
-        Theme
-      </button>
-      <button class="tab-btn" data-tab="about">
-        <span class="icon">ℹ️</span>
-        About
-      </button>
+    <!-- Dynamic Tab Navigation -->
+    <nav class="tab-navigation" id="tabNavigation">
+      <!-- Tabs will be dynamically generated here -->
+      <div class="tab-loading">🔄 Loading tabs...</div>
     </nav>
 
-    <!-- Tab Content -->
-    <div class="tab-content">
-      <!-- Modules Tab -->
+    <!-- Tab Content Container -->
+    <main class="tab-content" id="tabContent">
+      
+      <!-- Default/Modules Tab (always present) -->
       <div class="tab-pane active" id="modulesTab">
+        <div class="modules-header">
+          <div class="modules-stats">
+            <div class="stat-item">
+              <span class="stat-value" id="moduleCount">0</span>
+              <span class="stat-label">Total Modules</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="activeCount">0</span>
+              <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="lastScan">Never</span>
+              <span class="stat-label">Last Scan</span>
+            </div>
+          </div>
+          
+          <div class="header-actions">
+            <button id="scanModulesBtn" class="action-btn primary">
+              <span class="btn-icon">🔍</span>
+              Scan
+            </button>
+            <button id="safeMode" class="action-btn warning">
+              <span class="btn-icon">🛡️</span>
+              Safe Mode
+            </button>
+          </div>
+        </div>
+
         <!-- Module Categories -->
         <div class="category-filters">
           <button class="category-btn active" data-category="all">All</button>
@@ -85,68 +72,74 @@
             <p>Click "Scan" to discover available modules</p>
           </div>
         </div>
+
+        <!-- Global Actions -->
+        <div class="global-actions">
+          <button id="reloadAll" class="quick-btn">
+            <span class="btn-icon">🔄</span>
+            Reload All
+          </button>
+          <button id="settingsBtn" class="quick-btn">
+            <span class="btn-icon">⚙️</span>
+            Settings
+          </button>
+        </div>
       </div>
 
-      <!-- Theme Tab -->
-      <div class="tab-pane" id="themeTab">
-        <!-- Will be loaded from tabs/theme.html -->
-        <div class="loading-placeholder">Loading theme settings...</div>
+      <!-- Dynamic tabs will be created here -->
+      
+      <!-- Loading State Template -->
+      <div class="loading-state" id="loadingState" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
       </div>
 
-      <!-- About Tab -->
-      <div class="tab-pane" id="aboutTab">
-        <!-- Will be loaded from tabs/about.html -->
-        <div class="loading-placeholder">Loading about information...</div>
-      </div>
-    </div>
-
-    <!-- Quick Actions Footer -->
-    <footer class="popup-footer">
-      <div class="quick-actions">
-        <button id="safeMode" class="btn btn-warning" title="Enter Safe Mode">
-          <span class="icon">🛡️</span>
-          Safe Mode
-        </button>
-        <button id="reloadAll" class="btn btn-secondary" title="Reload all active modules">
-          <span class="icon">🔄</span>
-          Reload All
-        </button>
-        <button id="settingsBtn" class="btn btn-secondary" title="Global Settings">
-          <span class="icon">⚙️</span>
-          Settings
-        </button>
-      </div>
-    </footer>
+    </main>
   </div>
 
+  <!-- Templates -->
+  
+  <!-- Tab Button Template -->
+  <template id="tabButtonTemplate">
+    <button class="tab-btn" data-tab="">
+      <span class="icon"></span>
+      <span class="tab-name"></span>
+    </button>
+  </template>
+
+  <!-- Tab Pane Template -->
+  <template id="tabPaneTemplate">
+    <div class="tab-pane" id="">
+      <div class="loading-placeholder">Loading...</div>
+    </div>
+  </template>
+
   <!-- Module Item Template -->
-  <template id="moduleItemTemplate">
+  <template id="moduleTemplate">
     <div class="module-item" data-module-id="">
       <div class="module-header">
         <div class="module-info">
-          <div class="module-icon">📦</div>
-          <div class="module-details">
+          <div class="module-title">
             <h3 class="module-name"></h3>
-            <p class="module-description"></p>
-            <div class="module-meta">
-              <span class="module-version"></span>
-              <span class="module-category"></span>
-              <span class="module-author"></span>
-            </div>
+            <span class="module-version"></span>
           </div>
+          <p class="module-description"></p>
         </div>
-        <div class="module-actions">
+        
+        <div class="module-controls">
           <div class="module-status">
             <div class="status-indicator"></div>
             <span class="status-text"></span>
           </div>
-          <div class="toggle-switch">
-            <input type="checkbox" class="module-toggle" />
-            <label class="toggle-label"></label>
-          </div>
+          
+          <label class="toggle-switch">
+            <input type="checkbox" class="module-toggle">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
       </div>
-      
+
+      <!-- Expandable module body -->
       <div class="module-body" style="display: none;">
         <div class="module-tags"></div>
         <div class="module-settings"></div>
@@ -180,24 +173,112 @@
     </div>
   </template>
 
-  <!-- Modal Template -->
-  <template id="modalTemplate">
-    <div class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 class="modal-title"></h3>
-          <button class="modal-close">×</button>
-        </div>
-        <div class="modal-body"></div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary modal-cancel">Cancel</button>
-          <button class="btn btn-primary modal-confirm">Confirm</button>
-        </div>
-      </div>
-    </div>
-  </template>
+  <!-- Loading Indicator -->
+  <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading modules...</div>
+  </div>
 
   <!-- Scripts -->
+  <script src="tab-loader.js"></script>
   <script src="popup.js" type="module"></script>
 </body>
 </html>
+
+<style>
+/* Additional styles for dynamic tabs */
+.tab-navigation {
+  display: flex;
+  background: var(--theme-panel-1, #313244);
+  border-bottom: 1px solid var(--theme-border, #45475a);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-navigation::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: var(--theme-text-secondary, #a6adc8);
+  font-size: 14px;
+  width: 100%;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--theme-text-secondary, #a6adc8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.tab-btn:hover {
+  background: var(--theme-panel-2, #3a3e52);
+  color: var(--theme-text, #cdd6f4);
+}
+
+.tab-btn.active {
+  color: var(--theme-accent-1, #cba6f7);
+  border-bottom-color: var(--theme-accent-1, #cba6f7);
+  background: var(--theme-panel-2, #3a3e52);
+}
+
+.tab-btn .icon {
+  font-size: 16px;
+}
+
+.tab-btn .tab-name {
+  font-weight: 500;
+}
+
+/* Loading state styles */
+.loading-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--theme-text-secondary, #a6adc8);
+  font-size: 14px;
+}
+
+/* Error state styles */
+.error-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--theme-error, #f38ba8);
+}
+
+.error-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.error-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.error-message {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+</style>
