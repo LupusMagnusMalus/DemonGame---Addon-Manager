@@ -1,0 +1,271 @@
+/* ============================================================================
+   Core Color Palette - Lupus Addon Manager
+   Complete theme system with 15 customizable + 3 computed colors
+   ============================================================================ */
+
+:root {
+  /* ========== STRUCTURE COLORS (4) ========== */
+  --theme-background: #1e1e2e;      /* Main application background */
+  --theme-sidebar: #181825;         /* Sidebar/navigation background */
+  --theme-panel-1: #313244;         /* Cards, panels, elevated elements */
+  --theme-border: #45475a;          /* Borders, dividers, separators */
+  
+  /* ========== COMPUTED PANEL HIERARCHY ========== */
+  /* Panel-2 and Panel-3 are automatically 10% and 20% lighter than Panel-1 */
+  --theme-panel-2: color-mix(in srgb, var(--theme-panel-1) 90%, white 10%);
+  --theme-panel-3: color-mix(in srgb, var(--theme-panel-1) 80%, white 20%);
+  
+  /* ========== TEXT COLORS (2) ========== */
+  --theme-text: #cdd6f4;            /* Primary text color */
+  --theme-text-secondary: #a6adc8;  /* Secondary text, labels, placeholders */
+  
+  /* ========== ACCENT COLORS (3) ========== */
+  --theme-accent-1: #cba6f7;        /* Primary accent (buttons, links, highlights) */
+  --theme-accent-2: #89b4fa;        /* Secondary accent (alternative actions) */
+  --theme-accent-3: #74c0fc;        /* Tertiary accent (special elements) */
+  
+  /* ========== SEMANTIC COLORS (4) ========== */
+  --theme-success: #a6e3a1;         /* Success messages, positive feedback */
+  --theme-warning: #f9e2af;         /* Warnings, caution messages */
+  --theme-error: #f38ba8;           /* Errors, critical issues */
+  --theme-info: #89b4fa;            /* Information, helpful hints */
+  
+  /* ========== BUTTON COLORS (2) ========== */
+  --theme-button-confirm: #a6e3a1;  /* OK, Yes, Save, Confirm buttons */
+  --theme-button-cancel: #6c7086;   /* Cancel, No, Close buttons (neutral) */
+  
+  /* ========== COMPUTED STATES ========== */
+  --theme-hover: color-mix(in srgb, var(--theme-accent-1) 90%, white 10%);
+  
+  /* ========== BACKWARDS COMPATIBILITY ========== */
+  /* Legacy Catppuccin variable names for existing components */
+  --ctp-base: var(--theme-background);
+  --ctp-mantle: var(--theme-sidebar);
+  --ctp-crust: var(--theme-sidebar);
+  --ctp-surface0: var(--theme-panel-1);
+  --ctp-surface1: var(--theme-panel-2);
+  --ctp-surface2: var(--theme-border);
+  --ctp-overlay0: var(--theme-border);
+  --ctp-overlay1: var(--theme-text-secondary);
+  --ctp-overlay2: var(--theme-text-secondary);
+  --ctp-text: var(--theme-text);
+  --ctp-subtext1: var(--theme-text);
+  --ctp-subtext0: var(--theme-text-secondary);
+  --ctp-mauve: var(--theme-accent-1);
+  --ctp-blue: var(--theme-accent-2);
+  --ctp-sapphire: var(--theme-accent-3);
+  --ctp-green: var(--theme-success);
+  --ctp-yellow: var(--theme-warning);
+  --ctp-red: var(--theme-error);
+  
+  /* Additional legacy colors */
+  --ctp-rosewater: #f5e0dc;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-pink: #f5c2e7;
+  --ctp-maroon: #eba0ac;
+  --ctp-peach: #fab387;
+  --ctp-teal: #94e2d5;
+  --ctp-sky: #89dceb;
+  --ctp-lavender: #b4befe;
+}
+
+/* ============================================================================
+   PRESET THEMES
+   ============================================================================ */
+
+/* Theme 1: Catppuccin Mocha (Default Dark) */
+/* Warm dark theme with purple accents and excellent readability */
+[data-theme="catppuccin-mocha"],
+:root {
+  --theme-background: #1e1e2e;
+  --theme-sidebar: #181825;
+  --theme-panel-1: #313244;
+  --theme-border: #45475a;
+  --theme-text: #cdd6f4;
+  --theme-text-secondary: #a6adc8;
+  --theme-accent-1: #cba6f7;
+  --theme-accent-2: #89b4fa;
+  --theme-accent-3: #74c0fc;
+  --theme-success: #a6e3a1;
+  --theme-warning: #f9e2af;
+  --theme-error: #f38ba8;
+  --theme-info: #89b4fa;
+  --theme-button-confirm: #a6e3a1;
+  --theme-button-cancel: #6c7086;
+}
+
+/* Theme 2: GitHub Dark */
+/* Professional dark theme inspired by GitHub's design system */
+[data-theme="github-dark"] {
+  --theme-background: #0d1117;
+  --theme-sidebar: #010409;
+  --theme-panel-1: #161b22;
+  --theme-border: #30363d;
+  --theme-text: #e6edf3;
+  --theme-text-secondary: #7d8590;
+  --theme-accent-1: #a371f7;
+  --theme-accent-2: #58a6ff;
+  --theme-accent-3: #79c0ff;
+  --theme-success: #3fb950;
+  --theme-warning: #d29922;
+  --theme-error: #f85149;
+  --theme-info: #58a6ff;
+  --theme-button-confirm: #3fb950;
+  --theme-button-cancel: #484f58;
+}
+
+/* Theme 3: Nord */
+/* Arctic-inspired cool color palette with blue-gray tones */
+[data-theme="nord"] {
+  --theme-background: #2e3440;
+  --theme-sidebar: #242933;
+  --theme-panel-1: #3b4252;
+  --theme-border: #4c566a;
+  --theme-text: #eceff4;
+  --theme-text-secondary: #d8dee9;
+  --theme-accent-1: #88c0d0;
+  --theme-accent-2: #81a1c1;
+  --theme-accent-3: #5e81ac;
+  --theme-success: #a3be8c;
+  --theme-warning: #ebcb8b;
+  --theme-error: #bf616a;
+  --theme-info: #81a1c1;
+  --theme-button-confirm: #a3be8c;
+  --theme-button-cancel: #4c566a;
+}
+
+/* Theme 4: Dracula */
+/* Vibrant dark theme with high contrast and bold colors */
+[data-theme="dracula"] {
+  --theme-background: #282a36;
+  --theme-sidebar: #1e1f29;
+  --theme-panel-1: #44475a;
+  --theme-border: #6272a4;
+  --theme-text: #f8f8f2;
+  --theme-text-secondary: #9fa3b4;
+  --theme-accent-1: #bd93f9;
+  --theme-accent-2: #8be9fd;
+  --theme-accent-3: #ff79c6;
+  --theme-success: #50fa7b;
+  --theme-warning: #f1fa8c;
+  --theme-error: #ff5555;
+  --theme-info: #8be9fd;
+  --theme-button-confirm: #50fa7b;
+  --theme-button-cancel: #6272a4;
+}
+
+/* Theme 5: Catppuccin Latte (Light) */
+/* Warm light theme with excellent contrast for bright environments */
+[data-theme="catppuccin-latte"] {
+  --theme-background: #eff1f5;
+  --theme-sidebar: #e6e9ef;
+  --theme-panel-1: #ccd0da;
+  --theme-border: #acb0be;
+  --theme-text: #4c4f69;
+  --theme-text-secondary: #6c6f85;
+  --theme-accent-1: #8839ef;
+  --theme-accent-2: #1e66f5;
+  --theme-accent-3: #04a5e5;
+  --theme-success: #40a02b;
+  --theme-warning: #df8e1d;
+  --theme-error: #d20f39;
+  --theme-info: #1e66f5;
+  --theme-button-confirm: #40a02b;
+  --theme-button-cancel: #9ca0b0;
+}
+
+/* ============================================================================
+   CUSTOM THEME
+   Colors applied dynamically via JavaScript
+   ============================================================================ */
+body.custom-theme {
+  /* Theme variables will be set inline via JavaScript */
+  /* This class indicates that a custom theme is active */
+}
+
+/* ============================================================================
+   UTILITY CLASSES FOR THEME-AWARE COMPONENTS
+   ============================================================================ */
+
+/* Background variants */
+.bg-background { background-color: var(--theme-background); }
+.bg-sidebar { background-color: var(--theme-sidebar); }
+.bg-panel-1 { background-color: var(--theme-panel-1); }
+.bg-panel-2 { background-color: var(--theme-panel-2); }
+.bg-panel-3 { background-color: var(--theme-panel-3); }
+
+/* Text color variants */
+.text-primary { color: var(--theme-text); }
+.text-secondary { color: var(--theme-text-secondary); }
+
+/* Accent colors */
+.accent-1 { color: var(--theme-accent-1); }
+.accent-2 { color: var(--theme-accent-2); }
+.accent-3 { color: var(--theme-accent-3); }
+
+/* Semantic colors */
+.success { color: var(--theme-success); }
+.warning { color: var(--theme-warning); }
+.error { color: var(--theme-error); }
+.info { color: var(--theme-info); }
+
+/* Border utilities */
+.border-default { border-color: var(--theme-border); }
+
+/* ============================================================================
+   BROWSER COMPATIBILITY FALLBACKS
+   For browsers that don't support color-mix()
+   ============================================================================ */
+
+@supports not (background: color-mix(in srgb, red, blue)) {
+  /* Fallback: Panel hierarchy with hardcoded lighter shades */
+  :root {
+    --theme-panel-2: #3a3e52;
+    --theme-panel-3: #434960;
+  }
+  
+  [data-theme="github-dark"] {
+    --theme-panel-2: #1f252c;
+    --theme-panel-3: #282f36;
+  }
+  
+  [data-theme="nord"] {
+    --theme-panel-2: #434c5e;
+    --theme-panel-3: #4c566a;
+  }
+  
+  [data-theme="dracula"] {
+    --theme-panel-2: #4d5066;
+    --theme-panel-3: #565973;
+  }
+  
+  [data-theme="catppuccin-latte"] {
+    --theme-panel-2: #bcc0cc;
+    --theme-panel-3: #acb0be;
+  }
+}
+
+/* ============================================================================
+   NOTES FOR DEVELOPERS
+   
+   Color Structure:
+   - 15 customizable colors (user can change via color picker)
+   - 3 computed colors (automatically derived for consistency)
+   
+   Adding New Themes:
+   1. Create new [data-theme="theme-name"] block
+   2. Define all 15 customizable colors
+   3. Panel-2, Panel-3, and hover are auto-computed
+   4. Add theme to core/color-palette.js themes object
+   
+   Usage in Components:
+   - Always use var(--theme-*) instead of hardcoded colors
+   - Use semantic colors (success/warning/error/info) for feedback
+   - Use button-confirm/button-cancel for consistent button styling
+   
+   Panel Hierarchy:
+   - panel-1: Base elevation (cards, containers)
+   - panel-2: Nested elements (10% lighter)
+   - panel-3: Deeply nested elements (20% lighter)
+   
+   ============================================================================ */

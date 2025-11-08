@@ -1,6 +1,6 @@
 /**
  * DemonGame Addon Manager - Popup Interface
- * Main popup functionality for module management and settings
+ * Main popup functionality with TabLoader integration
  */
 
 class PopupManager {
@@ -9,6 +9,8 @@ class PopupManager {
     this.currentCategory = 'all';
     this.modules = new Map();
     this.isScanning = false;
+    this.tabLoader = null;
+    this.loadedTabControllers = new Map();
     
     this.init();
   }
@@ -20,6 +22,9 @@ class PopupManager {
     try {
       console.log('🚀 Initializing popup...');
       
+      // Initialize TabLoader
+      this.tabLoader = new TabLoader();
+      
       // Setup event listeners
       this.setupEventListeners();
       
@@ -28,6 +33,9 @@ class PopupManager {
       
       // Update UI
       this.updateUI();
+      
+      // Load default tab content
+      await this.switchTab(this.currentTab);
       
       console.log('✅ Popup initialized successfully');
     } catch (error) {
@@ -51,16 +59,19 @@ class PopupManager {
     });
 
     // Scan modules button
-    document.getElementById('scanModulesBtn').addEventListener('click', () => this.scanModules());
+    document.getElementById('scanModulesBtn')?.addEventListener('click', () => this.scanModules());
 
     // Quick actions
-    document.getElementById('safeMode').addEventListener('click', () => this.enterSafeMode());
-    document.getElementById('reloadAll').addEventListener('click', () => this.reloadAllModules());
-    document.getElementById('settingsBtn').addEventListener('click', () => this.openGlobalSettings());
+    document.getElementById('safeMode')?.addEventListener('click', () => this.enterSafeMode());
+    document.getElementById('reloadAll')?.addEventListener('click', () => this.reloadAllModules());
+    document.getElementById('settingsBtn')?.addEventListener('click', () => this.openGlobalSettings());
 
     // Module list click delegation
-    document.getElementById('moduleList').addEventListener('click', (e) => this.handleModuleAction(e));
-    document.getElementById('moduleList').addEventListener('change', (e) => this.handleModuleToggle(e));
+    const moduleList = document.getElementById('moduleList');
+    if (moduleList) {
+      moduleList.addEventListener('click', (e) => this.handleModuleAction(e));
+      moduleList.addEventListener('change', (e) => this.handleModuleToggle(e));
+    }
   }
 
   /**
@@ -100,97 +111,165 @@ class PopupManager {
     const totalModules = this.modules.size;
     const activeModules = Array.from(this.modules.values()).filter(m => m.enabled).length;
     
-    document.getElementById('moduleCount').textContent = totalModules;
-    document.getElementById('activeCount').textContent = activeModules;
+    const moduleCountEl = document.getElementById('moduleCount');
+    const activeCountEl = document.getElementById('activeCount');
+    const lastScanEl = document.getElementById('lastScan');
     
-    if (this.lastScan) {
-      const scanDate = new Date(this.lastScan);
-      document.getElementById('lastScan').textContent = this.formatRelativeTime(scanDate);
-    } else {
-      document.getElementById('lastScan').textContent = 'Never';
+    if (moduleCountEl) moduleCountEl.textContent = totalModules;
+    if (activeCountEl) activeCountEl.textContent = activeModules;
+    
+    if (lastScanEl) {
+      if (this.lastScan) {
+        const scanDate = new Date(this.lastScan);
+        lastScanEl.textContent = this.formatRelativeTime(scanDate);
+      } else {
+        lastScanEl.textContent = 'Never';
+      }
     }
   }
 
   /**
-   * Switch tabs
+   * Switch tabs using TabLoader
    */
   async switchTab(tabName) {
     if (this.currentTab === tabName) return;
     
-    this.currentTab = tabName;
-    
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabName);
-    });
-    
-    // Update tab content
-    document.querySelectorAll('.tab-pane').forEach(pane => {
-      pane.classList.toggle('active', pane.id === `${tabName}Tab`);
-    });
-    
-    // Load tab content if needed
-    await this.loadTabContent(tabName);
-  }
-
-  /**
-   * Load tab content dynamically
-   */
-  async loadTabContent(tabName) {
-    if (tabName === 'theme') {
-      await this.loadThemeTab();
-    } else if (tabName === 'about') {
-      await this.loadAboutTab();
+    try {
+      // Cleanup previous tab
+      if (this.currentTab && this.loadedTabControllers.has(this.currentTab)) {
+        this.cleanupTab(this.currentTab);
+      }
+      
+      this.currentTab = tabName;
+      
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+      
+      // Update tab content visibility
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === `${tabName}Tab`);
+      });
+      
+      // Load tab content using TabLoader
+      if (tabName !== 'modules') { // modules tab is statically loaded
+        await this.loadTabWithLoader(tabName);
+      }
+      
+    } catch (error) {
+      console.error(`Failed to switch to tab ${tabName}:`, error);
+      this.showError('Tab Loading Error', `Failed to load ${tabName} tab`);
     }
   }
 
   /**
-   * Load theme tab content
+   * Load tab content using TabLoader
    */
-  async loadThemeTab() {
-    const tabPane = document.getElementById('themeTab');
-    if (tabPane.dataset.loaded) return;
+  async loadTabWithLoader(tabName) {
+    try {
+      const tabPane = document.getElementById(`${tabName}Tab`);
+      if (!tabPane) {
+        console.warn(`Tab pane not found: ${tabName}Tab`);
+        return;
+      }
+      
+      // Skip if already loaded and contains content
+      if (tabPane.dataset.loaded === 'true' && tabPane.innerHTML.trim()) {
+        console.log(`♻️ Tab ${tabName} already loaded`);
+        return;
+      }
+      
+      // Show loading state
+      tabPane.innerHTML = '<div class="loading-placeholder">Loading...</div>';
+      
+      // Load tab using TabLoader
+      const html = await this.tabLoader.loadTab(tabName);
+      
+      // Update tab content
+      tabPane.innerHTML = html;
+      tabPane.dataset.loaded = 'true';
+      
+      // Initialize tab controller if available
+      await this.initializeTabController(tabName);
+      
+      console.log(`✅ Tab ${tabName} loaded successfully`);
+      
+    } catch (error) {
+      console.error(`Failed to load tab ${tabName}:`, error);
+      
+      const tabPane = document.getElementById(`${tabName}Tab`);
+      if (tabPane) {
+        tabPane.innerHTML = `
+          <div class="error-placeholder">
+            <div class="error-icon">❌</div>
+            <div class="error-title">Failed to load ${tabName}</div>
+            <div class="error-message">${error.message}</div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  /**
+   * Initialize tab controller
+   */
+  async initializeTabController(tabName) {
+    try {
+      const initFunction = window[`init_${tabName}`];
+      
+      if (typeof initFunction === 'function') {
+        console.log(`🎬 Initializing ${tabName} controller`);
+        await initFunction(this);
+        this.loadedTabControllers.set(tabName, true);
+      } else {
+        console.log(`ℹ️ No controller found for ${tabName} tab`);
+      }
+    } catch (error) {
+      console.error(`Failed to initialize ${tabName} controller:`, error);
+    }
+  }
+
+  /**
+   * Cleanup tab controller
+   */
+  cleanupTab(tabName) {
+    try {
+      if (this.loadedTabControllers.has(tabName)) {
+        this.tabLoader.unloadTab(tabName);
+        this.loadedTabControllers.delete(tabName);
+      }
+    } catch (error) {
+      console.error(`Failed to cleanup ${tabName} tab:`, error);
+    }
+  }
+
+  /**
+   * Scan for available modules
+   */
+  async scanModules() {
+    if (this.isScanning) return;
+    
+    this.isScanning = true;
+    this.showLoading('Scanning for modules...');
     
     try {
-      const response = await fetch(chrome.runtime.getURL('core/popup/tabs/theme.html'));
-      const html = await response.text();
-      tabPane.innerHTML = html;
+      const result = await this.sendMessage({ type: 'SCAN_MODULES' });
       
-      // Initialize theme functionality
-      await this.initializeThemeTab();
-      
-      tabPane.dataset.loaded = 'true';
+      if (result.success) {
+        await this.loadData();
+        this.updateUI();
+        this.showNotification(`Found ${result.found || 0} modules`, 'success');
+      } else {
+        throw new Error(result.error || 'Module scan failed');
+      }
     } catch (error) {
-      console.error('Failed to load theme tab:', error);
-      tabPane.innerHTML = '<div class="error">Failed to load theme settings</div>';
+      console.error('Module scan failed:', error);
+      this.showNotification('Module scan failed', 'error');
+    } finally {
+      this.isScanning = false;
+      this.hideLoading();
     }
-  }
-
-  /**
-   * Load about tab content
-   */
-  async loadAboutTab() {
-    const tabPane = document.getElementById('aboutTab');
-    if (tabPane.dataset.loaded) return;
-    
-    try {
-      const response = await fetch(chrome.runtime.getURL('core/popup/tabs/about.html'));
-      const html = await response.text();
-      tabPane.innerHTML = html;
-      
-      tabPane.dataset.loaded = 'true';
-    } catch (error) {
-      console.error('Failed to load about tab:', error);
-      tabPane.innerHTML = '<div class="error">Failed to load about information</div>';
-    }
-  }
-
-  /**
-   * Initialize theme tab functionality
-   */
-  async initializeThemeTab() {
-    // Theme functionality will be implemented separately
-    console.log('Theme tab initialized');
   }
 
   /**
@@ -217,17 +296,23 @@ class PopupManager {
     const moduleList = document.getElementById('moduleList');
     const emptyState = document.getElementById('emptyState');
     
+    if (!moduleList) return;
+    
     // Filter modules by category
     const filteredModules = this.getFilteredModules();
     
     if (filteredModules.length === 0) {
-      emptyState.style.display = 'flex';
-      moduleList.innerHTML = '';
-      moduleList.appendChild(emptyState);
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        moduleList.innerHTML = '';
+        moduleList.appendChild(emptyState);
+      }
       return;
     }
     
-    emptyState.style.display = 'none';
+    if (emptyState) {
+      emptyState.style.display = 'none';
+    }
     
     // Sort modules by priority, then name
     filteredModules.sort((a, b) => {
@@ -259,46 +344,37 @@ class PopupManager {
   }
 
   /**
-   * Create module element
+   * Create module list element
    */
   createModuleElement(module) {
-    const template = document.getElementById('moduleItemTemplate');
-    const element = template.content.cloneNode(true);
+    const template = document.getElementById('moduleTemplate');
+    if (!template) {
+      console.error('Module template not found');
+      return document.createElement('div');
+    }
     
-    // Set data attribute
+    const element = template.content.cloneNode(true);
     const moduleItem = element.querySelector('.module-item');
+    
+    // Set module data
     moduleItem.dataset.moduleId = module.id;
     
-    // Fill in module info
-    element.querySelector('.module-icon').textContent = module.icon || '📦';
-    element.querySelector('.module-name').textContent = module.name;
-    element.querySelector('.module-description').textContent = module.description || 'No description';
-    
-    // Meta information
-    const metaContainer = element.querySelector('.module-meta');
-    metaContainer.innerHTML = `
-      <span class="module-version">v${module.version}</span>
-      <span class="module-category">${module.category}</span>
-      <span class="module-author">${module.author || 'Unknown'}</span>
-    `;
-    
-    // Status
+    // Fill in module information
+    const nameElement = element.querySelector('.module-name');
+    const descElement = element.querySelector('.module-description');
+    const versionElement = element.querySelector('.module-version');
+    const toggleElement = element.querySelector('.module-toggle');
     const statusIndicator = element.querySelector('.status-indicator');
     const statusText = element.querySelector('.status-text');
     
-    this.updateModuleStatus(statusIndicator, statusText, module);
+    if (nameElement) nameElement.textContent = module.name;
+    if (descElement) descElement.textContent = module.description || '';
+    if (versionElement) versionElement.textContent = module.version || '1.0.0';
+    if (toggleElement) toggleElement.checked = module.enabled || false;
     
-    // Toggle switch
-    const toggle = element.querySelector('.module-toggle');
-    toggle.checked = module.enabled;
-    toggle.disabled = module.status === 'error';
-    
-    // Tags
-    if (module.tags && module.tags.length > 0) {
-      const tagsContainer = element.querySelector('.module-tags');
-      tagsContainer.innerHTML = module.tags.map(tag => 
-        `<span class="module-tag">${tag}</span>`
-      ).join('');
+    // Update status
+    if (statusIndicator && statusText) {
+      this.updateModuleStatus(statusIndicator, statusText, module);
     }
     
     return element;
@@ -308,6 +384,7 @@ class PopupManager {
    * Update module status indicator
    */
   updateModuleStatus(indicator, textElement, module) {
+    // Clear previous classes
     indicator.className = 'status-indicator';
     
     switch (module.status) {
@@ -390,14 +467,14 @@ class PopupManager {
         
         this.showNotification(`Module ${module.name} ${enabled ? 'enabled' : 'disabled'}`, 'success');
       } else {
-        // Revert toggle on error
-        event.target.checked = !enabled;
-        this.showNotification('Failed to toggle module', 'error');
+        throw new Error(result.error || 'Toggle failed');
       }
     } catch (error) {
-      // Revert toggle on error
+      console.error(`Failed to toggle module ${moduleId}:`, error);
+      
+      // Revert toggle state
       event.target.checked = !enabled;
-      console.error('Toggle error:', error);
+      
       this.showNotification('Failed to toggle module', 'error');
     } finally {
       this.setModuleLoading(moduleId, false);
@@ -405,43 +482,44 @@ class PopupManager {
   }
 
   /**
-   * Toggle module expansion (show/hide details)
+   * Update module in list
    */
-  toggleModuleExpansion(moduleItem) {
-    const moduleBody = moduleItem.querySelector('.module-body');
-    const isExpanded = moduleBody.style.display !== 'none';
+  updateModuleInList(moduleId, moduleData) {
+    const moduleItem = document.querySelector(`[data-module-id="${moduleId}"]`);
+    if (!moduleItem) return;
     
-    moduleBody.style.display = isExpanded ? 'none' : 'block';
-    moduleItem.classList.toggle('expanded', !isExpanded);
+    const statusIndicator = moduleItem.querySelector('.status-indicator');
+    const statusText = moduleItem.querySelector('.status-text');
+    
+    this.updateModuleStatus(statusIndicator, statusText, moduleData);
   }
 
   /**
-   * Scan for modules
+   * Toggle module expansion
    */
-  async scanModules() {
-    if (this.isScanning) return;
+  toggleModuleExpansion(moduleItem) {
+    const body = moduleItem.querySelector('.module-body');
+    if (body) {
+      body.style.display = body.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  /**
+   * Set module loading state
+   */
+  setModuleLoading(moduleId, loading) {
+    const moduleItem = document.querySelector(`[data-module-id="${moduleId}"]`);
+    if (!moduleItem) return;
     
-    try {
-      this.isScanning = true;
-      this.showLoading('Scanning modules...');
-      
-      const result = await this.sendMessage({ type: 'SCAN_MODULES' });
-      
-      if (result.success) {
-        // Reload data
-        await this.loadData();
-        this.updateUI();
-        
-        this.showNotification(`Found ${result.count} modules`, 'success');
-      } else {
-        this.showNotification('Module scan failed', 'error');
-      }
-    } catch (error) {
-      console.error('Scan error:', error);
-      this.showNotification('Module scan failed', 'error');
-    } finally {
-      this.isScanning = false;
-      this.hideLoading();
+    const toggle = moduleItem.querySelector('.toggle-switch');
+    const statusIndicator = moduleItem.querySelector('.status-indicator');
+    
+    if (loading) {
+      toggle?.classList.add('loading');
+      statusIndicator?.classList.add('loading');
+    } else {
+      toggle?.classList.remove('loading');
+      statusIndicator?.classList.remove('loading');
     }
   }
 
@@ -498,97 +576,40 @@ class PopupManager {
   }
 
   /**
-   * Set module loading state
-   */
-  setModuleLoading(moduleId, loading) {
-    const moduleItem = document.querySelector(`[data-module-id="${moduleId}"]`);
-    if (!moduleItem) return;
-    
-    const toggle = moduleItem.querySelector('.toggle-switch');
-    const statusIndicator = moduleItem.querySelector('.status-indicator');
-    
-    if (loading) {
-      toggle.classList.add('loading');
-      statusIndicator.classList.add('loading');
-    } else {
-      toggle.classList.remove('loading');
-      statusIndicator.classList.remove('loading');
-    }
-  }
-
-  /**
-   * Update module in list
-   */
-  updateModuleInList(moduleId, moduleData) {
-    const moduleItem = document.querySelector(`[data-module-id="${moduleId}"]`);
-    if (!moduleItem) return;
-    
-    const statusIndicator = moduleItem.querySelector('.status-indicator');
-    const statusText = moduleItem.querySelector('.status-text');
-    
-    this.updateModuleStatus(statusIndicator, statusText, moduleData);
-  }
-
-  /**
    * Show loading indicator
    */
   showLoading(text = 'Loading...') {
     const indicator = document.getElementById('loadingIndicator');
-    const textElement = indicator.querySelector('.loading-text');
+    const textElement = indicator?.querySelector('.loading-text');
     
-    textElement.textContent = text;
-    indicator.style.display = 'flex';
+    if (indicator) {
+      if (textElement) textElement.textContent = text;
+      indicator.style.display = 'flex';
+    }
   }
 
   /**
    * Hide loading indicator
    */
   hideLoading() {
-    document.getElementById('loadingIndicator').style.display = 'none';
+    const indicator = document.getElementById('loadingIndicator');
+    if (indicator) {
+      indicator.style.display = 'none';
+    }
   }
 
   /**
    * Show notification
    */
   showNotification(message, type = 'info', duration = 3000) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-      <div class="notification-content">
-        <span class="notification-message">${message}</span>
-      </div>
-      <button class="notification-close">×</button>
-    `;
-    
-    // Add to DOM
-    document.body.appendChild(notification);
-    
-    // Setup close button
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-      this.removeNotification(notification);
-    });
-    
-    // Auto-remove after duration
-    if (duration > 0) {
-      setTimeout(() => {
-        this.removeNotification(notification);
-      }, duration);
+    // Use global notification system if available
+    if (window.notifications) {
+      window.notifications.show(message, type, { duration });
+      return;
     }
-  }
-
-  /**
-   * Remove notification
-   */
-  removeNotification(notification) {
-    if (notification.parentNode) {
-      notification.style.opacity = '0';
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 300);
-    }
+    
+    // Fallback notification
+    console.log(`${type.toUpperCase()}: ${message}`);
   }
 
   /**
@@ -645,7 +666,14 @@ class PopupManager {
 
   async reloadModule(moduleId) {
     console.log('Reloading module:', moduleId);
-    // TODO: Implement individual module reload
+    try {
+      const result = await this.sendMessage({ type: 'RELOAD_MODULE', moduleId });
+      if (result.success) {
+        this.showNotification(`Module ${moduleId} reloaded`, 'success');
+      }
+    } catch (error) {
+      this.showNotification('Failed to reload module', 'error');
+    }
   }
 
   async unloadModule(moduleId) {
